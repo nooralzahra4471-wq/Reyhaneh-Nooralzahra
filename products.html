@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>محصولات</title>
+<style>
+:root{--g:#d4af37;--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--text:#f0f0f0;--text2:#888;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,sans-serif;padding-bottom:80px}
+
+/* هدر */
+header{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.2);padding:12px}
+.search-wrap{position:relative}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid rgba(212,175,55,.2);border-radius:25px;padding:10px 42px 10px 16px;color:var(--text);font-family:Tahoma;font-size:13px;outline:none}
+.search-wrap input:focus{border-color:var(--g)}
+.search-wrap input::placeholder{color:var(--text2)}
+.s-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text2)}
+
+/* دسته اصلی */
+.main-cats{display:flex;gap:8px;overflow-x:auto;padding:10px 12px;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.1);scrollbar-width:none}
+.main-cats::-webkit-scrollbar{display:none}
+.mcat{flex:0 0 auto;padding:8px 16px;border-radius:20px;font-size:12px;cursor:pointer;background:var(--bg3);color:var(--text2);border:1px solid transparent;white-space:nowrap;transition:.2s}
+.mcat.active{background:rgba(212,175,55,.15);color:var(--g);border-color:rgba(212,175,55,.3)}
+
+/* آکاردیون */
+.accordion-wrap{padding:10px 12px}
+.acc-item{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.1);margin-bottom:8px;overflow:hidden}
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;cursor:pointer;user-select:none}
+.acc-title{font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.acc-arrow{color:var(--g);font-size:12px;transition:.3s;display:inline-block}
+.acc-item.open .acc-arrow{transform:rotate(90deg)}
+.acc-body{display:none;border-top:1px solid rgba(212,175,55,.1)}
+.acc-item.open .acc-body{display:block}
+
+/* زیردسته */
+.sub-item{border-bottom:1px solid rgba(255,255,255,.05)}
+.sub-item:last-child{border-bottom:none}
+.sub-header{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;cursor:pointer;user-select:none}
+.sub-title{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.sub-item.open .sub-title{color:var(--g)}
+.sub-arrow{color:var(--text2);font-size:11px;transition:.3s}
+.sub-item.open .sub-arrow{transform:rotate(90deg);color:var(--g)}
+.sub-body{display:none;background:rgba(0,0,0,.2)}
+.sub-item.open .sub-body{display:block}
+
+/* زیرزیردسته */
+.subsub-item{display:flex;align-items:center;justify-content:space-between;padding:10px 22px;border-bottom:1px solid rgba(255,255,255,.03);cursor:pointer}
+.subsub-item:last-child{border-bottom:none}
+.subsub-item:active{background:rgba(212,175,55,.07)}
+.subsub-title{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.subsub-item.active .subsub-title{color:var(--g)}
+.subsub-count{font-size:10px;color:var(--text2);background:var(--bg4);padding:2px 8px;border-radius:10px}
+
+/* محصولات */
+.prod-section{padding:0 12px}
+.prod-section-title{font-size:12px;color:var(--text2);margin:12px 0 8px;display:flex;align-items:center;gap:6px}
+.prod-section-title::before{content:'';width:3px;height:12px;background:var(--g);border-radius:2px;display:block}
+.prod-grid{display:flex;flex-direction:column;gap:10px}
+.prod-card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.1);overflow:hidden;transition:.2s;display:flex;align-items:center;gap:12px;padding:10px}
+.prod-card:active{transform:scale(.98);background:rgba(212,175,55,.08)}
+.prod-img{width:90px;height:90px;object-fit:cover;border-radius:10px;flex-shrink:0}
+.prod-placeholder{width:90px;height:90px;background:linear-gradient(135deg,#1a1a1a,#2a2a1a);display:flex;align-items:center;justify-content:center;font-size:28px;border-radius:10px;flex-shrink:0}
+.prod-info{flex:1;min-width:0}
+.prod-name{font-size:13px;font-weight:700;margin-bottom:4px;line-height:1.4;cursor:pointer}
+.prod-cat-tag{font-size:10px;color:var(--text2);background:var(--bg4);display:inline-block;padding:2px 8px;border-radius:8px;margin-bottom:5px}
+.prod-price{color:var(--g);font-size:14px;font-weight:700}
+.prod-price span{font-size:10px;color:var(--text2);font-weight:400}
+.prod-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.btn-add{background:var(--g);border:none;color:#000;width:32px;height:32px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+
+/* خالی */
+.empty{text-align:center;padding:50px 20px;color:var(--text2)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-text{font-size:13px}
+
+/* مودال محصول */
+#detailModal{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column}
+#detailModal.open{display:flex}
+.modal-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.2);position:sticky;top:0;z-index:5}
+.modal-back{background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);color:var(--g);width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-header-title{color:var(--g);font-size:14px;font-weight:700;flex:1}
+.modal-scroll{overflow-y:auto;flex:1}
+.modal-img{width:100%;max-height:320px;object-fit:cover}
+.modal-placeholder{width:100%;height:260px;background:linear-gradient(135deg,#1a1200,#2a2200);display:flex;align-items:center;justify-content:center;font-size:70px}
+.modal-content{padding:16px}
+.modal-name{font-size:20px;font-weight:700;margin-bottom:8px;color:var(--text)}
+.modal-tag{font-size:11px;color:var(--text2);background:var(--bg4);display:inline-block;padding:3px 10px;border-radius:10px;margin-bottom:12px}
+.modal-price{color:var(--g);font-size:26px;font-weight:700;margin-bottom:14px}
+.modal-price span{font-size:13px;color:var(--text2);font-weight:400}
+.modal-desc{font-size:13px;color:var(--text2);line-height:2.2;margin-bottom:24px;background:var(--bg3);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.05)}
+.modal-btn{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer}
+
+/* نوار پایین */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid rgba(212,175,55,.2);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;text-decoration:none;color:var(--text2);border:none;background:none;font-family:Tahoma}
+.nav-item.active{color:var(--g)}
+.nav-icon{font-size:22px}
+.nav-label{font-size:10px}
+
+/* toast */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(67,160,71,.95);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;z-index:9999;transition:.3s;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="search-wrap">
+    <input type="text" placeholder="جستجو در محصولات..." id="searchInput" oninput="doSearch()">
+    <span class="s-icon">🔍</span>
+  </div>
+</header>
+
+<!-- دسته‌های اصلی -->
+<div class="main-cats" id="mainCats">
+  <div class="mcat active" onclick="selectMain(-1,this)">همه</div>
+</div>
+
+<!-- آکاردیون دسته‌بندی -->
+<div class="accordion-wrap" id="accordionWrap"></div>
+
+<!-- محصولات -->
+<div class="prod-section">
+  <div class="prod-section-title" id="prodSectionTitle">همه محصولات</div>
+
+  <div class="prod-grid" id="prodGrid"></div>
+  <div class="empty" id="emptyState" style="display:none">
+    <div class="empty-icon">🛍️</div>
+    <div class="empty-text">محصولی یافت نشد</div>
+  </div>
+</div>
+
+<!-- مودال جزئیات -->
+<div id="detailModal">
+  <div class="modal-header">
+    <button class="modal-back" onclick="closeDetail()">❮</button>
+    <div class="modal-header-title" id="dHeaderTitle">جزئیات محصول</div>
+  </div>
+  <div class="modal-scroll">
+    <div id="detailImgWrap"></div>
+    <div class="modal-content">
+      <div class="modal-name" id="dName"></div>
+      <div class="modal-tag" id="dCat"></div>
+      <div class="modal-price" id="dPrice"> <span>تومان</span></div>
+      <div class="modal-desc" id="dDesc"></div>
+      <button class="modal-btn" onclick="addToCart()">🛒 افزودن به سبد خرید</button>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">خانه</span></a>
+  <a href="products.html" class="nav-item active"><span class="nav-icon">🛍️</span><span class="nav-label">محصولات</span></a>
+  <a href="club.html" class="nav-item"><span class="nav-icon">⭐</span><span class="nav-label">باشگاه</span></a>
+  <a href="entertainment.html" class="nav-item"><span class="nav-icon">🎵</span><span class="nav-label">سرگرمی</span></a>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+// ===== داده‌ها =====
+var cats    = JSON.parse(localStorage.getItem('cats2') || 'null') || defaultCats();
+var prods   = JSON.parse(localStorage.getItem('products') || '[]');
+var cart    = JSON.parse(localStorage.getItem('cart') || '[]');
+
+var selectedMain   = -1;  // -1 = همه
+var selectedSub    = null;
+var selectedSubSub = null;
+var currentProd    = null;
+
+function defaultCats(){
+  return [
+    {id:'1', name:'تسبیح و زیارت', icon:'📿', subs:[
+      {id:'1-1', name:'تسبیح', subs:[
+        {id:'1-1-1', name:'تسبیح کریستال'},
+        {id:'1-1-2', name:'تسبیح چوبی'},
+        {id:'1-1-3', name:'تسبیح فیروزه‌ای'}
+      ]},
+      {id:'1-2', name:'مهر نماز', subs:[
+        {id:'1-2-1', name:'مهر خاک مدینه'},
+        {id:'1-2-2', name:'مهر کربلا'}
+      ]}
+    ]},
+    {id:'2', name:'پوشاک مذهبی', icon:'👘', subs:[
+      {id:'2-1', name:'بانوان', subs:[
+        {id:'2-1-1', name:'چادر'},
+        {id:'2-1-2', name:'روسری'},
+        {id:'2-1-3', name:'مانتو'}
+      ]},
+      {id:'2-2', name:'آقایان', subs:[
+        {id:'2-2-1', name:'قبا'},
+        {id:'2-2-2', name:'عمامه'}
+      ]}
+    ]},
+    {id:'3', name:'عطر و بوی خوش', icon:'🕌', subs:[
+      {id:'3-1', name:'عطر حرمین', subs:[
+        {id:'3-1-1', name:'عطر مکه'},
+        {id:'3-1-2', name:'عطر مدینه'},
+        {id:'3-1-3', name:'عطر کربلا'}
+      ]},
+      {id:'3-2', name:'اسپری', subs:[
+        {id:'3-2-1', name:'اسپری لباس'}
+      ]}
+    ]},
+    {id:'4', name:'هدیه مذهبی', icon:'🎁', subs:[
+      {id:'4-1', name:'جعبه هدیه', subs:[
+        {id:'4-1-1', name:'هدیه نوزاد'},
+        {id:'4-1-2', name:'هدیه ازدواج'}
+      ]}
+    ]}
+  ];
+}
+
+// ===== رندر دسته اصلی =====
+function renderMainCats(){
+  var el = document.getElementById('mainCats');
+  el.innerHTML = '<div class="mcat'+(selectedMain===-1?' active':'')+'" onclick="selectMain(-1,this)">همه</div>';
+  cats.forEach(function(cat, i){
+    el.innerHTML += '<div class="mcat'+(selectedMain===i?' active':'')+'" onclick="selectMain('+i+',this)">'+(cat.icon||'📦')+' '+cat.name+'</div>';
+  });
+}
+
+function selectMain(idx, el){
+  document.querySelectorAll('.mcat').forEach(function(e){ e.classList.remove('active'); });
+  el.classList.add('active');
+  selectedMain   = idx;
+  selectedSub    = null;
+  selectedSubSub = null;
+  renderAccordion();
+  renderProds();
+}
+
+// ===== آکاردیون =====
+function renderAccordion(){
+  var wrap = document.getElementById('accordionWrap');
+  if(selectedMain === -1){ wrap.innerHTML = ''; return; }
+  var cat = cats[selectedMain];
+  if(!cat || !cat.subs || !cat.subs.length){ wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = cat.subs.map(function(sub, si){
+    var subSubHtml = '';
+    if(sub.subs && sub.subs.length){
+      subSubHtml = sub.subs.map(function(ss, ssi){
+        var count = prodsInCat(ss.id).length;
+        return '<div class="subsub-item'+(selectedSubSub===ss.id?' active':'')+'" onclick="selectSubSub(\''+ss.id+'\',\''+sub.id+'\')">'
+          +'<span class="subsub-title">◈ '+ss.name+'</span>'
+          +'<span class="subsub-count">'+count+'</span>'
+          +'</div>';
+      }).join('');
+    }
+    return '<div class="acc-item" id="acc-'+si+'">'
+      +'<div class="acc-header" onclick="toggleAcc('+si+')">'
+      +'<span class="acc-title">▸ '+sub.name+'</span>'
+      +'<span class="acc-arrow">❯</span>'
+      +'</div>'
+      +(subSubHtml ? '<div class="acc-body">'+subSubHtml+'</div>' : '')
+      +'</div>';
+  }).join('');
+}
+
+function toggleAcc(i){
+  var el = document.getElementById('acc-'+i);
+  var wasOpen = el.classList.contains('open');
+  document.querySelectorAll('.acc-item').forEach(function(e){ e.classList.remove('open'); });
+  if(!wasOpen) el.classList.add('open');
+  var cat = cats[selectedMain];
+  if(cat && cat.subs[i]){
+    selectedSub    = wasOpen ? null : cat.subs[i].id;
+    selectedSubSub = null;
+    renderProds();
+  }
+}
+
+function selectSubSub(ssId, subId){
+  selectedSub    = subId;
+  selectedSubSub = selectedSubSub === ssId ? null : ssId;
+  // آپدیت UI
+  document.querySelectorAll('.subsub-item').forEach(function(e){ e.classList.remove('active'); });
+  if(selectedSubSub){
+    var found = document.querySelector('.subsub-item[onclick*="\''+ssId+'\'"]');
+    if(found) found.classList.add('active');
+  }
+  renderProds();
+}
+
+// ===== محصولات =====
+function prodsInCat(catId){
+  return prods.filter(function(p){ return p.catId === catId; });
+}
+
+function renderProds(list){
+  var filtered = list || filterProds();
+  var grid = document.getElementById('prodGrid');
+  var empty = document.getElementById('emptyState');
+  var title = document.getElementById('prodSectionTitle');
+
+  // عنوان
+  if(selectedSubSub){
+    var ss = findCat(selectedSubSub);
+    title.textContent = ss ? ss.name : 'محصولات';
+  } else if(selectedSub){
+    var s = findCat(selectedSub);
+    title.textContent = s ? s.name : 'محصولات';
+  } else if(selectedMain >= 0){
+    title.textContent = cats[selectedMain].name;
+  } else {
+    title.textContent = 'همه محصولات';
+  }
+
+  if(!filtered.length){
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  grid.innerHTML = filtered.map(function(p, i){
+    return '<div class="prod-card" onclick="showDetail(\''+p._idx+'\')">'+
+      (p.img
+        ? '<img class="prod-img" src="'+p.img+'" alt="'+p.name+'">'
+        : '<div class="prod-placeholder">🛍️</div>')+
+      '<div class="prod-info">'+
+      '<div class="prod-name">'+p.name+'</div>'+
+      (p.catName ? '<div class="prod-cat-tag">'+p.catName+'</div>' : '')+
+      '<div class="prod-footer">'+
+      '<div class="prod-price">'+p.price+' <span>تومان</span></div>'+
+      '<button class="btn-add" onclick="event.stopPropagation();quickAdd(\''+p._idx+'\')">+</button>'+
+      '</div></div></div>';
+  }).join('');
+}
+
+function filterProds(){
+  return prods.map(function(p, i){ p._idx = i; return p; }).filter(function(p){
+    if(selectedSubSub) return p.catId === selectedSubSub;
+    if(selectedSub){
+      // همه محصولات زیردسته و زیرزیردسته
+      var sub = findCat(selectedSub);
+      if(!sub) return false;
+      var ids = [selectedSub];
+      if(sub.subs) sub.subs.forEach(function(ss){ ids.push(ss.id); });
+      return ids.indexOf(p.catId) > -1;
+    }
+    if(selectedMain >= 0){
+      var cat = cats[selectedMain];
+      var ids = [cat.id];
+      if(cat.subs) cat.subs.forEach(function(sub){
+        ids.push(sub.id);
+        if(sub.subs) sub.subs.forEach(function(ss){ ids.push(ss.id); });
+      });
+      return ids.indexOf(p.catId) > -1;
+    }
+    return true;
+  });
+}
+
+function findCat(id){
+  for(var i=0; i<cats.length; i++){
+    if(cats[i].id===id) return cats[i];
+    if(cats[i].subs) for(var j=0; j<cats[i].subs.length; j++){
+      if(cats[i].subs[j].id===id) return cats[i].subs[j];
+      if(cats[i].subs[j].subs) for(var k=0; k<cats[i].subs[j].subs.length; k++){
+        if(cats[i].subs[j].subs[k].id===id) return cats[i].subs[j].subs[k];
+      }
+    }
+  }
+  return null;
+}
+
+// ===== جستجو =====
+function doSearch(){
+  var q = document.getElementById('searchInput').value.trim();
+  if(!q){ renderProds(); return; }
+  var res = prods.map(function(p,i){ p._idx=i; return p; }).filter(function(p){
+    return p.name.indexOf(q)>-1 || (p.desc && p.desc.indexOf(q)>-1);
+  });
+  renderProds(res);
+}
+
+// ===== مودال =====
+function showDetail(idx){
+  currentProd = prods[idx];
+  var p = currentProd;
+  document.getElementById('detailImgWrap').innerHTML = p.img
+    ? '<img class="modal-img" src="'+p.img+'" alt="'+p.name+'">'
+    : '<div class="modal-placeholder">🛍️</div>';
+  document.getElementById('dHeaderTitle').textContent = p.name || 'جزئیات محصول';
+  document.getElementById('dName').textContent  = p.name || '';
+  document.getElementById('dCat').textContent   = p.catName || '';
+  document.getElementById('dPrice').innerHTML   = '<span style="font-size:26px;font-weight:700;color:var(--g)">'+(p.price||'')+'</span> <span style="font-size:13px;color:var(--text2)">تومان</span>';
+  document.getElementById('dDesc').textContent  = p.desc || 'توضیحی ثبت نشده';
+  document.getElementById('detailModal').classList.add('open');
+  document.getElementById('detailModal').scrollTop = 0;
+}
+function closeDetail(){ document.getElementById('detailModal').classList.remove('open'); }
+
+// ===== سبد =====
+function addToCart(){
+  if(!currentProd) return;
+  cart.push({name:currentProd.name, price:currentProd.price, img:currentProd.img});
+  localStorage.setItem('cart', JSON.stringify(cart));
+  toast('✅ به سبد افزوده شد');
+  closeDetail();
+}
+function quickAdd(idx){
+  var p = prods[idx];
+  cart.push({name:p.name, price:p.price, img:p.img});
+  localStorage.setItem('cart', JSON.stringify(cart));
+  toast('✅ '+p.name);
+}
+
+function toast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show';
+  setTimeout(function(){ el.className = ''; }, 2000);
+}
+
+// ===== اپلای کانفیگ =====
+function applyConfig(){
+  try{
+    var c = JSON.parse(localStorage.getItem('appConfig')||'{}');
+    var r = document.documentElement.style;
+    if(c.colorPrimary) r.setProperty('--g',   c.colorPrimary);
+    if(c.colorBg)      r.setProperty('--bg',  c.colorBg);
+    if(c.colorBg2)     r.setProperty('--bg2', c.colorBg2);
+    if(c.colorText)    r.setProperty('--text',c.colorText);
+    if(c.fontFamily)   r.setProperty('font-family', c.fontFamily);
+    if(c.borderRadius) r.setProperty('--radius', c.borderRadius+'px');
+  }catch(e){}
+}
+
+// سرویس ورکر
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+
+applyConfig();
+renderMainCats();
+renderAccordion();
+renderProds();
+</script>
+</body>
+</html>

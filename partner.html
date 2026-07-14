@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>پنل همکاران</title>
+<style>
+:root{--g:#d4af37;--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--text:#f0f0f0;--text2:#888;--red:#e53935;--green:#43a047;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,sans-serif;min-height:100vh;padding-bottom:30px}
+
+/* ورود */
+#loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:24px}
+.login-logo{width:90px;height:90px;border-radius:50%;border:2px solid var(--g);object-fit:cover;margin-bottom:14px;box-shadow:0 0 30px rgba(212,175,55,.4)}
+.login-title{color:var(--g);font-size:18px;font-weight:700;margin-bottom:4px}
+.login-sub{color:var(--text2);font-size:12px;margin-bottom:28px}
+.login-box{width:100%;max-width:320px;background:var(--bg3);border-radius:16px;padding:22px;border:1px solid rgba(212,175,55,.2)}
+.inp-label{font-size:12px;color:var(--text2);display:block;margin-bottom:6px}
+.inp{width:100%;background:var(--bg4);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:13px 14px;color:var(--text);font-family:Tahoma;font-size:16px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:3px}
+.inp:focus{border-color:var(--g)}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer}
+.login-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;display:none}
+
+/* هدر */
+#partnerPanel{display:none}
+header{background:linear-gradient(135deg,#1a1200,#0a0a0a);border-bottom:1px solid rgba(212,175,55,.2);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.h-info{display:flex;align-items:center;gap:10px}
+.h-avatar{width:38px;height:38px;background:rgba(212,175,55,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid rgba(212,175,55,.3)}
+.h-name{color:var(--g);font-size:14px;font-weight:700}
+.h-code{color:var(--text2);font-size:11px}
+.btn-logout{background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);color:var(--red);padding:7px 12px;border-radius:20px;font-size:11px;cursor:pointer}
+
+/* تب */
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.1)}
+.tab{flex:1;text-align:center;padding:12px 4px;font-size:12px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:.2s}
+.tab.active{color:var(--g);border-bottom-color:var(--g)}
+
+.content{padding:14px}
+.section{display:none}
+.section.active{display:block}
+
+/* کارت */
+.card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.1);padding:16px;margin-bottom:12px}
+.card-title{color:var(--g);font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+
+/* محصولات */
+.prod-card{background:var(--bg4);border-radius:var(--radius);border:1px solid rgba(212,175,55,.08);margin-bottom:10px;overflow:hidden}
+.prod-header{display:flex;align-items:center;gap:10px;padding:12px}
+.prod-img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:24px}
+.prod-img img{width:100%;height:100%;border-radius:10px;object-fit:cover}
+.prod-info{flex:1}
+.prod-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.prod-cat{font-size:11px;color:var(--text2);background:var(--bg3);display:inline-block;padding:2px 8px;border-radius:8px}
+
+/* جدول قیمت */
+.price-table{border-top:1px solid rgba(212,175,55,.1);padding:10px 12px}
+.price-title{font-size:11px;color:var(--text2);margin-bottom:8px}
+.price-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.price-row:last-child{border-bottom:none}
+.price-range{font-size:12px;color:var(--text2)}
+.price-val{font-size:13px;color:var(--g);font-weight:700}
+.price-unit{font-size:10px;color:var(--text2)}
+
+/* سفارش */
+.order-section{padding:10px 12px;border-top:1px solid rgba(212,175,55,.1);display:none}
+.order-section.open{display:block}
+.qty-wrap{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.qty-btn{width:34px;height:34px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:var(--g);border-radius:8px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty-inp{flex:1;background:var(--bg4);border:1px solid rgba(212,175,55,.2);border-radius:8px;padding:8px;color:var(--text);font-family:Tahoma;font-size:15px;text-align:center;outline:none}
+.price-calc{background:rgba(212,175,55,.08);border-radius:8px;padding:10px;margin-bottom:10px;text-align:center}
+.calc-label{font-size:11px;color:var(--text2)}
+.calc-total{font-size:20px;color:var(--g);font-weight:700;margin-top:4px}
+.btn-order{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer}
+.btn-toggle{width:100%;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);color:var(--g);border-radius:0 0 var(--radius) var(--radius);padding:10px;font-size:12px;cursor:pointer}
+
+/* سفارشات */
+.order-item{background:var(--bg4);border-radius:var(--radius);padding:12px;margin-bottom:8px;border:1px solid rgba(212,175,55,.08)}
+.order-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.order-name{font-size:13px;font-weight:600}
+.order-status{font-size:11px;padding:3px 10px;border-radius:10px}
+.status-pending{background:rgba(255,152,0,.15);color:#ffa726}
+.status-done{background:rgba(67,160,71,.15);color:#66bb6a}
+.order-details{font-size:12px;color:var(--text2);line-height:1.9}
+.order-price{color:var(--g);font-weight:700}
+
+/* فیلد */
+.field{margin-bottom:12px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px}
+.field input,.field textarea{width:100%;background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;color:var(--text);font-family:Tahoma;font-size:13px;outline:none}
+.field input:focus,.field textarea:focus{border-color:var(--g)}
+.field textarea{resize:vertical;min-height:70px;line-height:1.7}
+
+/* اطلاعات من */
+.info-row{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:12px;color:var(--text2)}
+.info-val{font-size:12px;color:var(--text);font-weight:600}
+
+/* خالی */
+.empty{text-align:center;padding:40px 20px;color:var(--text2)}
+.empty-icon{font-size:40px;margin-bottom:10px}
+
+/* toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(67,160,71,.95);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;z-index:9999;transition:.3s;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.err{background:rgba(229,57,53,.95)}
+</style>
+</head>
+<body>
+
+<!-- ورود -->
+<div id="loginScreen">
+  <img class="login-logo" id="loginLogo" src="logo.png" alt="لوگو">
+  <div class="login-title">پنل همکاران ویژه</div>
+  <div class="login-sub" id="loginShopName">ریحانة نورالزهرا</div>
+  <div class="login-box">
+    <label class="inp-label">رمز اختصاصی همکاری</label>
+    <input class="inp" type="text" id="partnerCode" placeholder="کد HMK-XXXX" maxlength="8"  onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" onclick="doLogin()">ورود به پنل همکاران</button>
+    <div class="login-err" id="loginErr">رمز اشتباه یا غیرفعال است!</div>
+  </div>
+</div>
+
+<!-- پنل همکار -->
+<div id="partnerPanel">
+  <header>
+    <div class="h-info">
+      <div class="h-avatar">🤝</div>
+      <div>
+        <div class="h-name" id="hName"></div>
+        <div class="h-code" id="hCode"></div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">خروج</button>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('products')">🛍️ محصولات</div>
+    <div class="tab" onclick="showTab('orders')">📋 سفارشات</div>
+    <div class="tab" onclick="showTab('profile')">👤 پروفایل</div>
+  </div>
+
+  <div class="content">
+
+    <!-- محصولات -->
+    <div class="section active" id="sec-products">
+      <div class="card" style="padding:10px 14px">
+        <input type="text" placeholder="🔍 جستجو در محصولات..." id="searchProd" oninput="filterProds()" style="width:100%;background:var(--bg4);border:1px solid rgba(212,175,55,.2);border-radius:25px;padding:9px 14px;color:var(--text);font-family:Tahoma;font-size:13px;outline:none">
+      </div>
+      <div id="prodList"></div>
+    </div>
+
+    <!-- سفارشات -->
+    <div class="section" id="sec-orders">
+      <div class="card">
+        <div class="card-title">📋 سفارشات من</div>
+        <div id="orderList"></div>
+      </div>
+    </div>
+
+    <!-- پروفایل -->
+    <div class="section" id="sec-profile">
+      <div class="card">
+        <div class="card-title">👤 اطلاعات همکاری</div>
+        <div class="info-row"><span class="info-label">نام</span><span class="info-val" id="pName"></span></div>
+        <div class="info-row"><span class="info-label">کد همکاری</span><span class="info-val" id="pCode"></span></div>
+        <div class="info-row"><span class="info-label">تاریخ عضویت</span><span class="info-val" id="pJoin"></span></div>
+        <div class="info-row"><span class="info-label">تعداد سفارشات</span><span class="info-val" id="pOrders"></span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📞 تماس با ما</div>
+        <div id="contactInfo" style="font-size:13px;color:var(--text2);line-height:2"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+var currentPartner = null;
+var allProds = [];
+
+// ===== کانفیگ =====
+function cfg(){ return JSON.parse(localStorage.getItem('appConfig')||'{}'); }
+
+// ===== ورود =====
+function doLogin(){
+  var input = document.getElementById('partnerCode').value.trim();
+  var code  = input.toUpperCase();
+  if(!code){ return; }
+
+  // ورود مدیر با کد 5856
+  if(input === '5856'){
+    currentPartner = {name:'مهندس حسینی (مدیر)', code:'OWNER', active:true, joinDate:'', phone:''};
+    localStorage.setItem('partnerSession', JSON.stringify({code:'OWNER', time:Date.now()}));
+    notifyEitaa('👑 مدیر وارد پنل همکاران شد\n🕐 '+nowTime());
+    showPanel();
+    return;
+  }
+
+  var partners = JSON.parse(localStorage.getItem('partners')||'[]');
+  var found = partners.find(function(p){ return p.code===code && p.active; });
+  if(!found){
+    document.getElementById('loginErr').style.display='block';
+    return;
+  }
+  currentPartner = found;
+  localStorage.setItem('partnerSession', JSON.stringify({code:code, time:Date.now()}));
+
+  // ثبت ورود
+  logVisit(found);
+  // اعلان ایتا
+  notifyEitaa('🤝 همکار وارد شد\n━━━━━━━━━━━━\n👤 نام: '+found.name+'\n🔑 کد: '+found.code+'\n🕐 ساعت: '+nowTime());
+
+  showPanel();
+}
+
+function doLogout(){
+  localStorage.removeItem('partnerSession');
+  currentPartner = null;
+  document.getElementById('partnerPanel').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('partnerCode').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+function logVisit(partner){
+  var logs = JSON.parse(localStorage.getItem('partnerLogs')||'[]');
+  logs.push({name:partner.name, code:partner.code, time:nowTime(), date:today()});
+  localStorage.setItem('partnerLogs', JSON.stringify(logs));
+}
+
+// ===== پنل =====
+function showPanel(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('partnerPanel').style.display='block';
+  document.getElementById('hName').textContent = currentPartner.name;
+  document.getElementById('hCode').textContent = 'کد: '+currentPartner.code;
+  document.getElementById('pName').textContent  = currentPartner.name;
+  document.getElementById('pCode').textContent  = currentPartner.code;
+  document.getElementById('pJoin').textContent  = currentPartner.joinDate||'-';
+
+  var myOrders = getMyOrders();
+  document.getElementById('pOrders').textContent = myOrders.length+' سفارش';
+
+  var c = cfg();
+  if(c.shopName)   document.getElementById('loginShopName').textContent = c.shopName;
+  if(c.logoImg)    document.getElementById('loginLogo').src = c.logoImg;
+  if(c.phone1)     document.getElementById('contactInfo').innerHTML = '📱 '+c.phone1+(c.phone2?'<br>📱 '+c.phone2:'')+(c.workHours?'<br>🕐 '+c.workHours:'');
+
+  renderProds();
+  renderOrders();
+}
+
+// ===== تب =====
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(function(t,i){
+    t.classList.toggle('active',['products','orders','profile'][i]===name);
+  });
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('sec-'+name).classList.add('active');
+}
+
+// ===== محصولات =====
+function renderProds(list){
+  allProds = JSON.parse(localStorage.getItem('products')||'[]');
+  var prods = list || allProds.filter(function(p){ return p.available!==false; });
+  var el = document.getElementById('prodList');
+  if(!prods.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">🛍️</div><div>محصولی ثبت نشده</div></div>'; return;
+  }
+  el.innerHTML = prods.map(function(p,i){
+    var tiers = p.partnerTiers || [];
+    var tiersHtml = tiers.length ? tiers.map(function(t){
+      return '<div class="price-row">'
+        +'<span class="price-range">'+t.from+' تا '+t.to+' عدد</span>'
+        +'<span><span class="price-val">'+t.price+'</span> <span class="price-unit">تومان</span></span></div>';
+    }).join('') : '<div style="color:var(--text2);font-size:12px;padding:8px 0">قیمت همکاری تنظیم نشده</div>';
+
+    return '<div class="prod-card" id="pc-'+i+'">'
+      +'<div class="prod-header">'
+      +(p.img ? '<div class="prod-img"><img src="'+p.img+'" alt=""></div>' : '<div class="prod-img">🛍️</div>')
+      +'<div class="prod-info"><div class="prod-name">'+p.name+'</div>'
+      +(p.catName?'<div class="prod-cat">'+p.catName+'</div>':'')+'</div></div>'
+      +'<div class="price-table"><div class="price-title">💰 جدول قیمت همکاری</div>'+tiersHtml+'</div>'
+      +(tiers.length?'<div class="order-section" id="os-'+i+'">'
+        +'<div class="qty-wrap">'
+        +'<button class="qty-btn" onclick="changeQty('+i+',-1)">−</button>'
+        +'<input class="qty-inp" type="number" id="qty-'+i+'" value="1" min="1" oninput="calcPrice('+i+')" onchange="calcPrice('+i+')">'
+        +'<button class="qty-btn" onclick="changeQty('+i+',1)">+</button>'
+        +'</div>'
+        +'<div class="price-calc"><div class="calc-label">مبلغ قابل پرداخت</div>'
+        +'<div class="calc-total" id="calc-'+i+'">— تومان</div></div>'
+        +'<div class="field"><label>توضیحات (اختیاری)</label>'
+        +'<textarea id="note-'+i+'" placeholder="آدرس، رنگ، مدل خاص..."></textarea></div>'
+        +'<button class="btn-order" onclick="submitOrder('+i+')">✅ ثبت سفارش</button>'
+        +'</div>':'')
+      +'<button class="btn-toggle" onclick="toggleOrder('+i+')">'
+      +(tiers.length?'🛒 ثبت سفارش':'📞 برای سفارش تماس بگیرید')+'</button>'
+      +'</div>';
+  }).join('');
+
+  // محاسبه اولیه
+  prods.forEach(function(p,i){ if(p.partnerTiers&&p.partnerTiers.length) calcPrice(i); });
+}
+
+function filterProds(){
+  var q = document.getElementById('searchProd').value.trim();
+  if(!q){ renderProds(); return; }
+  var filtered = allProds.filter(function(p){
+    return p.name.indexOf(q)>-1 && p.available!==false;
+  });
+  renderProds(filtered);
+}
+
+function toggleOrder(i){
+  var el = document.getElementById('os-'+i);
+  if(!el) return;
+  el.classList.toggle('open');
+}
+
+function changeQty(i, delta){
+  var inp = document.getElementById('qty-'+i);
+  var val = Math.max(1, parseInt(inp.value||1) + delta);
+  inp.value = val;
+  calcPrice(i);
+}
+
+function calcPrice(i){
+  var qty = parseInt(document.getElementById('qty-'+i).value||1);
+  var prods = JSON.parse(localStorage.getItem('products')||'[]');
+  var p = prods[i];
+  if(!p || !p.partnerTiers) return;
+  var price = 0;
+  p.partnerTiers.forEach(function(t){
+    if(qty >= parseInt(t.from) && qty <= parseInt(t.to)) price = parseInt(t.price.replace(/,/g,''));
+  });
+  var total = price * qty;
+  var el = document.getElementById('calc-'+i);
+  if(el) el.textContent = price ? numberFa(total)+' تومان' : 'خارج از بازه قیمتی';
+}
+
+function submitOrder(i){
+  var prods = JSON.parse(localStorage.getItem('products')||'[]');
+  var p = prods[i];
+  var qty = parseInt(document.getElementById('qty-'+i).value||1);
+  var note = document.getElementById('note-'+i).value;
+  var calc = document.getElementById('calc-'+i).textContent;
+
+  if(calc.indexOf('—')>-1 || calc.indexOf('خارج')>-1){ toast('تعداد را در بازه قیمتی وارد کنید','err'); return; }
+
+  var order = {
+    id: 'ORD-'+Date.now().toString().slice(-6),
+    partnerCode: currentPartner.code,
+    partnerName: currentPartner.name,
+    prodName: p.name,
+    qty: qty,
+    total: calc,
+    note: note,
+    status: 'pending',
+    date: today(),
+    time: nowTime()
+  };
+
+  var orders = JSON.parse(localStorage.getItem('partnerOrders')||'[]');
+  orders.push(order);
+  localStorage.setItem('partnerOrders', JSON.stringify(orders));
+
+  // اعلان ایتا
+  var msg = '📦 سفارش جدید همکار\n━━━━━━━━━━━━\n'
+    +'👤 همکار: '+currentPartner.name+'\n'
+    +'🔑 کد: '+currentPartner.code+'\n'
+    +'🛍️ محصول: '+p.name+'\n'
+    +'🔢 تعداد: '+qty+' عدد\n'
+    +'💰 مبلغ: '+calc+'\n'
+    +(note?'📝 توضیح: '+note+'\n':'')
+    +'📅 '+today()+' - '+nowTime()+'\n'
+    +'🆔 شماره سفارش: '+order.id;
+  notifyEitaa(msg);
+
+  renderOrders();
+  showTab('orders');
+  toast('✅ سفارش '+order.id+' ثبت شد!');
+
+  document.getElementById('os-'+i).classList.remove('open');
+  document.getElementById('qty-'+i).value = 1;
+  if(document.getElementById('note-'+i)) document.getElementById('note-'+i).value='';
+  calcPrice(i);
+}
+
+// ===== سفارشات =====
+function getMyOrders(){
+  var orders = JSON.parse(localStorage.getItem('partnerOrders')||'[]');
+  return orders.filter(function(o){ return o.partnerCode===currentPartner.code; });
+}
+
+function renderOrders(){
+  var orders = getMyOrders().slice().reverse();
+  var el = document.getElementById('orderList');
+  if(!orders.length){ el.innerHTML='<div class="empty"><div class="empty-icon">📋</div><div>سفارشی ثبت نشده</div></div>'; return; }
+  el.innerHTML = orders.map(function(o){
+    return '<div class="order-item">'
+      +'<div class="order-top">'
+      +'<div class="order-name">'+o.prodName+'</div>'
+      +'<span class="order-status '+(o.status==='done'?'status-done':'status-pending')+'">'+(o.status==='done'?'✅ تایید شد':'⏳ در انتظار')+'</span>'
+      +'</div>'
+      +'<div class="order-details">'
+      +'تعداد: '+o.qty+' عدد &nbsp;|&nbsp; <span class="order-price">'+o.total+'</span><br>'
+      +'شماره: '+o.id+' &nbsp;|&nbsp; '+o.date
+      +(o.note?'<br>توضیح: '+o.note:'')
+      +'</div></div>';
+  }).join('');
+}
+
+// ===== ایتا =====
+function notifyEitaa(msg){
+  try{
+    var c = cfg();
+    var links = JSON.parse(localStorage.getItem('eitaaLinks')||'[]');
+    links.forEach(function(l){
+      if(!l.token||!l.chatId) return;
+      fetch('https://eitaa.com/BotAPI'+l.token+'/sendMessage',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({chat_id:l.chatId,text:msg})
+      }).catch(function(){});
+    });
+  }catch(e){}
+}
+
+// ===== آپلای کانفیگ =====
+function applyConfig(){
+  try{
+    var c = cfg();
+    var r = document.documentElement.style;
+    if(c.colorPrimary) r.setProperty('--g',c.colorPrimary);
+    if(c.colorBg)      r.setProperty('--bg',c.colorBg);
+    if(c.colorBg2)     r.setProperty('--bg2',c.colorBg2);
+    if(c.colorText)    r.setProperty('--text',c.colorText);
+    if(c.shopName)     document.getElementById('loginShopName').textContent=c.shopName;
+    if(c.logoImg)      document.getElementById('loginLogo').src=c.logoImg;
+  }catch(e){}
+}
+
+// ===== کمکی =====
+function today(){ var d=new Date(); return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate(); }
+function nowTime(){ var d=new Date(); return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); }
+function numberFa(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,','); }
+function toast(msg,type){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.className='show'+(type==='err'?' err':'');
+  setTimeout(function(){ el.className=''; },2500);
+}
+
+// چک session
+var session = JSON.parse(localStorage.getItem('partnerSession')||'null');
+applyConfig();
+// session فقط ۸ ساعت معتبره
+var SESSION_HOURS = 8;
+if(session && session.code && session.time){
+  var elapsed = (Date.now() - session.time) / (1000*60*60);
+  if(elapsed < SESSION_HOURS){
+    var partners = JSON.parse(localStorage.getItem('partners')||'[]');
+    var found = partners.find(function(p){ return p.code===session.code && p.active; });
+    if(found){ currentPartner=found; showPanel(); }
+  } else {
+    localStorage.removeItem('partnerSession');
+  }
+}
+</script>
+</body>
+</html>

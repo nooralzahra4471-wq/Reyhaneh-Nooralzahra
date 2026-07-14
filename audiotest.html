@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تست صدا</title>
+<style>
+body{background:#111;color:#fff;font-family:Tahoma;padding:20px;text-align:center}
+.btn{background:#d4af37;color:#000;border:none;border-radius:10px;padding:14px 24px;font-size:15px;font-weight:700;cursor:pointer;margin:10px;display:block;width:100%}
+.log{background:#222;border-radius:10px;padding:14px;margin-top:14px;font-size:12px;text-align:right;line-height:2;min-height:100px}
+input[type=file]{display:none}
+audio{width:100%;margin-top:10px;border-radius:8px}
+</style>
+</head>
+<body>
+
+<h2 style="color:#d4af37">🎵 تست آپلود صدا</h2>
+
+<input type="file" id="f" accept="audio/*">
+<button class="btn" onclick="document.getElementById('f').click()">📁 انتخاب فایل صوتی</button>
+
+<div class="log" id="log">منتظر انتخاب فایل...</div>
+<audio id="player" controls style="display:none"></audio>
+
+<button class="btn" onclick="testIDB()" style="background:#333;color:#d4af37;margin-top:20px">🗄️ تست IndexedDB</button>
+<button class="btn" onclick="testLS()" style="background:#333;color:#d4af37">💾 تست LocalStorage</button>
+
+<script>
+function log(msg, color){
+  var el = document.getElementById('log');
+  var line = document.createElement('div');
+  line.style.color = color || '#fff';
+  line.textContent = '▸ ' + msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+document.getElementById('f').addEventListener('change', function(){
+  var file = this.files[0];
+  if(!file){ log('فایل انتخاب نشد', '#f44'); return; }
+  
+  log('فایل انتخاب شد: ' + file.name, '#4af');
+  log('حجم: ' + (file.size/1024/1024).toFixed(2) + ' MB', '#4af');
+  log('نوع: ' + file.type, '#4af');
+  
+  // تست پخش مستقیم
+  var url = URL.createObjectURL(file);
+  var player = document.getElementById('player');
+  player.src = url;
+  player.style.display = 'block';
+  log('✅ پخش مستقیم آماده‌ست!', '#4f4');
+  
+  // تست FileReader
+  log('در حال خواندن فایل...', '#fa4');
+  var reader = new FileReader();
+  reader.onprogress = function(e){
+    if(e.lengthComputable){
+      log('پیشرفت: ' + Math.round(e.loaded/e.total*100) + '%', '#fa4');
+    }
+  };
+  reader.onload = function(e){
+    log('✅ FileReader موفق! حجم base64: ' + (e.target.result.length/1024).toFixed(0) + ' KB', '#4f4');
+    
+    // تست ذخیره در IndexedDB
+    saveToIDB(file.name, e.target.result, file.size);
+  };
+  reader.onerror = function(e){
+    log('❌ خطای FileReader: ' + e.target.error, '#f44');
+  };
+  reader.readAsDataURL(file);
+});
+
+function saveToIDB(name, data, size){
+  log('در حال ذخیره در IndexedDB...', '#fa4');
+  var req = indexedDB.open('AudioTestDB', 1);
+  req.onupgradeneeded = function(e){
+    e.target.result.createObjectStore('audios', {keyPath:'id', autoIncrement:true});
+    log('IndexedDB ساخته شد', '#4af');
+  };
+  req.onsuccess = function(e){
+    var db = e.target.result;
+    var tx = db.transaction('audios', 'readwrite');
+    tx.objectStore('audios').add({name:name, data:data, size:size});
+    tx.oncomplete = function(){
+      log('✅ ذخیره در IndexedDB موفق!', '#4f4');
+    };
+    tx.onerror = function(e){
+      log('❌ خطای IndexedDB: ' + e.target.error, '#f44');
+    };
+  };
+  req.onerror = function(e){
+    log('❌ خطای باز کردن DB: ' + e.target.error, '#f44');
+  };
+}
+
+function testIDB(){
+  log('--- تست خواندن از IndexedDB ---', '#d4af37');
+  var req = indexedDB.open('AudioTestDB', 1);
+  req.onsuccess = function(e){
+    var db = e.target.result;
+    try{
+      var tx = db.transaction('audios', 'readonly');
+      var getAll = tx.objectStore('audios').getAll();
+      getAll.onsuccess = function(e){
+        var items = e.target.result;
+        log('تعداد فایل‌ها: ' + items.length, '#4f4');
+        items.forEach(function(item){
+          log('  - ' + item.name + ' (' + (item.size/1024/1024).toFixed(2) + ' MB)', '#4af');
+        });
+      };
+    }catch(e){
+      log('❌ خطا: ' + e.message, '#f44');
+    }
+  };
+  req.onerror = function(){
+    log('❌ IndexedDB در دسترس نیست', '#f44');
+  };
+}
+
+function testLS(){
+  log('--- تست LocalStorage ---', '#d4af37');
+  try{
+    localStorage.setItem('test','hello');
+    var v = localStorage.getItem('test');
+    log('LocalStorage: ' + (v==='hello'?'✅ کار می‌کنه':'❌ مشکل داره'), v==='hello'?'#4f4':'#f44');
+    localStorage.removeItem('test');
+  }catch(e){
+    log('❌ خطای LocalStorage: ' + e.message, '#f44');
+  }
+}
+
+log('صفحه لود شد — فایل صوتی انتخاب کن', '#888');
+testIDB();
+</script>
+</body>
+</html>

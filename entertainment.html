@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>سرگرمی</title>
+<style>
+:root{--g:#d4af37;--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--text:#f0f0f0;--text2:#888;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,sans-serif;padding-bottom:80px}
+
+header{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.2);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.h-back{color:var(--g);font-size:20px;text-decoration:none}
+.h-title{color:var(--g);font-size:16px;font-weight:700}
+
+/* تب */
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.1)}
+.tab{flex:1;text-align:center;padding:11px 4px;font-size:12px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;transition:.2s}
+.tab.active{color:var(--g);border-bottom-color:var(--g)}
+
+.content{padding:14px}
+.section{display:none}
+.section.active{display:block}
+
+/* مداحی */
+.audio-card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.12);padding:14px;margin-bottom:10px}
+.audio-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.audio-icon{width:48px;height:48px;background:linear-gradient(135deg,rgba(212,175,55,.2),rgba(212,175,55,.05));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.audio-info{flex:1}
+.audio-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.audio-src{font-size:11px;color:var(--text2)}
+.play-btn{width:38px;height:38px;background:var(--g);border:none;border-radius:50%;color:#000;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.play-btn.playing{background:rgba(212,175,55,.3);color:var(--g)}
+audio{width:100%;border-radius:8px;height:36px}
+audio::-webkit-media-controls-panel{background:var(--bg4)}
+
+/* حدیث */
+.hadith-card{background:linear-gradient(135deg,rgba(212,175,55,.08),rgba(212,175,55,.03));border:1px solid rgba(212,175,55,.2);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;position:relative}
+.hadith-card::before{content:'"';font-size:60px;color:rgba(212,175,55,.15);position:absolute;top:-10px;right:14px;font-family:Georgia,serif;line-height:1}
+.hadith-text{font-size:14px;line-height:2.2;color:var(--text);margin-bottom:12px;padding-top:10px}
+.hadith-source{font-size:12px;color:var(--g);font-weight:700}
+.hadith-nav{display:flex;justify-content:center;gap:12px;margin-top:14px}
+.h-nav-btn{background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.2);color:var(--g);padding:8px 20px;border-radius:20px;font-size:12px;cursor:pointer}
+.hadith-counter{text-align:center;font-size:11px;color:var(--text2);margin-top:8px}
+
+/* گالری */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.gallery-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer}
+.gallery-placeholder{width:100%;aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:11px}
+
+/* لایت‌باکس */
+#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center}
+#lightbox.open{display:flex}
+#lightbox img{max-width:95vw;max-height:85vh;border-radius:10px;object-fit:contain}
+#lightbox .lb-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.1);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer}
+.lb-nav{display:flex;gap:20px;margin-top:16px}
+.lb-btn{background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);color:var(--g);padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer}
+
+/* بازی - آزمون */
+.quiz-card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.12);padding:20px;margin-bottom:10px}
+.quiz-q{font-size:14px;line-height:1.9;margin-bottom:16px;color:var(--text)}
+.quiz-opts{display:flex;flex-direction:column;gap:8px}
+.quiz-opt{background:var(--bg4);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 14px;font-size:13px;cursor:pointer;text-align:right;color:var(--text);transition:.2s}
+.quiz-opt:active{transform:scale(.98)}
+.quiz-opt.correct{background:rgba(67,160,71,.2);border-color:#43a047;color:#81c784}
+.quiz-opt.wrong{background:rgba(229,57,53,.2);border-color:#e53935;color:#ef9a9a}
+.quiz-score{text-align:center;padding:20px;background:linear-gradient(135deg,rgba(212,175,55,.1),transparent);border-radius:var(--radius);border:1px solid rgba(212,175,55,.2)}
+.score-num{font-size:48px;color:var(--g);font-weight:700}
+.score-label{font-size:13px;color:var(--text2);margin-top:6px}
+.btn-next{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;margin-top:12px;display:none}
+.btn-restart{width:100%;background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);color:var(--g);border-radius:10px;padding:12px;font-size:13px;cursor:pointer;margin-top:10px}
+
+/* خالی */
+.empty{text-align:center;padding:50px 20px;color:var(--text2)}
+.empty-icon{font-size:48px;margin-bottom:10px}
+
+/* نوار پایین */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid rgba(212,175,55,.2);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;text-decoration:none;color:var(--text2);border:none;background:none;font-family:Tahoma}
+.nav-item.active{color:var(--g)}
+.nav-icon{font-size:22px}.nav-label{font-size:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="home.html" class="h-back">❮</a>
+  <div class="h-title">🎵 سرگرمی</div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('audio')">🎵 مداحی</div>
+  <div class="tab" onclick="showTab('hadith')">📖 حدیث</div>
+  <div class="tab" onclick="showTab('gallery')">🖼️ گالری</div>
+  <div class="tab" onclick="showTab('quiz')">🎮 آزمون</div>
+</div>
+
+<div class="content">
+
+  <!-- مداحی -->
+  <div class="section active" id="sec-audio">
+    <div id="audioList">
+      <div class="empty"><div class="empty-icon">🎵</div><div>فایل مداحی توسط ادمین آپلود می‌شود</div></div>
+    </div>
+  </div>
+
+  <!-- کلیپ -->
+  <div class="section" id="sec-video">
+    <div id="videoList">
+      <div class="empty"><div class="empty-icon">🎬</div><div>کلیپ توسط ادمین آپلود می‌شود</div></div>
+    </div>
+  </div>
+
+  <!-- حدیث -->
+  <div class="section" id="sec-hadith">
+    <div id="hadithBox">
+      <div class="empty"><div class="empty-icon">📖</div><div>حدیثی توسط ادمین ثبت نشده</div></div>
+    </div>
+    <div class="hadith-nav" id="hadithNav" style="display:none">
+      <button class="h-nav-btn" onclick="prevHadith()">❯ قبلی</button>
+      <button class="h-nav-btn" onclick="nextHadith()">❮ بعدی</button>
+    </div>
+    <div class="hadith-counter" id="hadithCounter"></div>
+  </div>
+
+  <!-- گالری -->
+  <div class="section" id="sec-gallery">
+    <div class="gallery-grid" id="galleryGrid">
+      <div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><div>تصویری توسط ادمین آپلود نشده</div></div>
+    </div>
+  </div>
+
+  <!-- آزمون -->
+  <div class="section" id="sec-quiz">
+    <div id="quizBox"></div>
+  </div>
+
+</div>
+
+<!-- لایت‌باکس -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLb()">✕</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-nav">
+    <button class="lb-btn" onclick="lbPrev()">❯</button>
+    <button class="lb-btn" onclick="lbNext()">❮</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">خانه</span></a>
+  <a href="products.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">محصولات</span></a>
+  <a href="club.html" class="nav-item"><span class="nav-icon">⭐</span><span class="nav-label">باشگاه</span></a>
+  <a href="entertainment.html" class="nav-item active"><span class="nav-icon">🎵</span><span class="nav-label">سرگرمی</span></a>
+</nav>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+var hadiths   = JSON.parse(localStorage.getItem('hadiths')||'[]');
+var gallery   = JSON.parse(localStorage.getItem('gallery')||'[]');
+var audios    = JSON.parse(localStorage.getItem('audios')||'[]');
+var curHadith = 0;
+var lbIdx     = 0;
+var curAudio  = null;
+
+// ===== تب =====
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(function(t,i){
+    t.classList.toggle('active',['audio','video','hadith','gallery','quiz'][i]===name);
+  });
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('sec-'+name).classList.add('active');
+}
+
+// ===== مداحی با IndexedDB =====
+var audioDB = null;
+
+function openAudioDB(cb){
+  if(audioDB){ cb(audioDB); return; }
+  var req = indexedDB.open('AudioTestDB', 1);
+  req.onupgradeneeded = function(e){
+    var db = e.target.result;
+    if(!db.objectStoreNames.contains('audios'))
+      db.createObjectStore('audios', {keyPath:'id', autoIncrement:true});
+    if(!db.objectStoreNames.contains('videos'))
+      db.createObjectStore('videos', {keyPath:'id', autoIncrement:true});
+  };
+  req.onsuccess = function(e){ audioDB = e.target.result; cb(audioDB); };
+  req.onerror   = function(){ };
+}
+
+function renderAudios(){
+  openAudioDB(function(db){
+    var tx  = db.transaction('audios','readonly');
+    var req = tx.objectStore('audios').getAll();
+    req.onsuccess = function(e){
+      var audios = e.target.result || [];
+      var el = document.getElementById('audioList');
+      if(!audios.length){
+        el.innerHTML='<div class="empty"><div class="empty-icon">🎵</div><div>فایل مداحی توسط ادمین آپلود می‌شود</div></div>';
+        return;
+      }
+      el.innerHTML = audios.map(function(a,i){
+        return '<div class="audio-card">'
+          +'<div class="audio-top">'
+          +'<div class="audio-icon">🎵</div>'
+          +'<div class="audio-info"><div class="audio-name">'+a.name+'</div><div class="audio-src">مداحی</div></div>'
+          +'<button class="play-btn" id="playbtn-'+i+'" onclick="togglePlay('+i+')">▶</button>'
+          +'</div>'
+          +'<audio id="audio-'+i+'" src="'+a.data+'" onended="onAudioEnd('+i+')" ontimeupdate="onProgress('+i+')"></audio>'
+          +'</div>';
+      }).join('');
+    };
+  });
+}
+
+function togglePlay(i){
+  var audio = document.getElementById('audio-'+i);
+  var btn   = document.getElementById('playbtn-'+i);
+  if(curAudio !== null && curAudio !== i){
+    document.getElementById('audio-'+curAudio).pause();
+    document.getElementById('playbtn-'+curAudio).textContent='▶';
+    document.getElementById('playbtn-'+curAudio).classList.remove('playing');
+  }
+  if(audio.paused){ audio.play(); btn.textContent='⏸'; btn.classList.add('playing'); curAudio=i; }
+  else { audio.pause(); btn.textContent='▶'; btn.classList.remove('playing'); curAudio=null; }
+}
+function onAudioEnd(i){
+  var btn=document.getElementById('playbtn-'+i);
+  if(btn){ btn.textContent='▶'; btn.classList.remove('playing'); }
+  curAudio=null;
+}
+function onProgress(i){}
+
+// ===== حدیث =====
+function renderHadith(){
+  var el=document.getElementById('hadithBox');
+  var nav=document.getElementById('hadithNav');
+  var counter=document.getElementById('hadithCounter');
+  if(!hadiths.length){
+    el.innerHTML='<div class="empty"><div class="empty-icon">📖</div><div>حدیثی توسط ادمین ثبت نشده</div></div>';
+    nav.style.display='none'; return;
+  }
+  var h=hadiths[curHadith];
+  el.innerHTML='<div class="hadith-card"><div class="hadith-text">'+h.text+'</div>'+(h.source?'<div class="hadith-source">— '+h.source+'</div>':'')+'</div>';
+  nav.style.display = hadiths.length>1 ? 'flex' : 'none';
+  counter.textContent = hadiths.length>1 ? (curHadith+1)+' از '+hadiths.length : '';
+}
+function nextHadith(){ curHadith=(curHadith+1)%hadiths.length; renderHadith(); }
+function prevHadith(){ curHadith=(curHadith-1+hadiths.length)%hadiths.length; renderHadith(); }
+
+// ===== ویدیو =====
+function renderVideos(){
+  var el = document.getElementById('videoList');
+  if(!el) return;
+  openAudioDB(function(db){
+    var req = db.transaction('videos','readonly').objectStore('videos').getAll();
+    req.onsuccess = function(e){
+      var list = e.target.result||[];
+      if(!list.length){
+        el.innerHTML='<div class="empty"><div class="empty-icon">🎬</div><div>کلیپ توسط ادمین آپلود می‌شود</div></div>';
+        return;
+      }
+      el.innerHTML = list.map(function(v){
+        return '<div style="margin-bottom:12px;background:var(--bg3);border-radius:var(--radius);overflow:hidden;border:1px solid rgba(212,175,55,.1)">'
+          +'<div style="padding:10px;font-size:13px;font-weight:600">🎬 '+v.name+'</div>'
+          +'<video controls src="'+v.data+'" style="width:100%;max-height:280px;background:#000" playsinline></video>'
+          +'</div>';
+      }).join('');
+    };
+    req.onerror = function(){
+      el.innerHTML='<div class="empty"><div class="empty-icon">🎬</div><div>کلیپ توسط ادمین آپلود می‌شود</div></div>';
+    };
+  });
+}
+
+// ===== گالری =====
+function renderGallery(){
+  var el=document.getElementById('galleryGrid');
+  if(!gallery.length){
+    el.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🖼️</div><div>تصویری آپلود نشده</div></div>'; return;
+  }
+  el.innerHTML=gallery.map(function(src,i){
+    return '<img class="gallery-img" src="'+src+'" onclick="openLb('+i+')">';
+  }).join('');
+}
+function openLb(i){ lbIdx=i; document.getElementById('lbImg').src=gallery[i]; document.getElementById('lightbox').classList.add('open'); }
+function closeLb(){ document.getElementById('lightbox').classList.remove('open'); }
+function lbNext(){ lbIdx=(lbIdx+1)%gallery.length; document.getElementById('lbImg').src=gallery[lbIdx]; }
+function lbPrev(){ lbIdx=(lbIdx-1+gallery.length)%gallery.length; document.getElementById('lbImg').src=gallery[lbIdx]; }
+
+// ===== آزمون =====
+var questions=[
+  {q:'اولین واجب بر هر مسلمان چیست؟',opts:['نماز','روزه','شهادتین','حج'],ans:2},
+  {q:'قرآن کریم دارای چند سوره است؟',opts:['۱۱۲','۱۱۴','۱۱۶','۱۱۸'],ans:1},
+  {q:'ماه رمضان چندمین ماه قمری است؟',opts:['هفتم','هشتم','نهم','دهم'],ans:2},
+  {q:'قبله مسلمانان کجاست؟',opts:['مدینه','کربلا','مکه (کعبه)','بیت‌المقدس'],ans:2},
+  {q:'حضرت محمد (ص) در کدام شهر متولد شدند؟',opts:['مدینه','مکه','طائف','یثرب'],ans:1},
+  {q:'نماز یومیه چند رکعت دارد؟',opts:['۱۵','۱۷','۱۶','۱۸'],ans:1},
+  {q:'حج واجب در کدام ماه قمری است؟',opts:['رجب','شعبان','ذی‌الحجه','محرم'],ans:2},
+  {q:'زکات فطره در چه روزی واجب می‌شود؟',opts:['عید فطر','شب قدر','عرفه','عاشورا'],ans:0},
+];
+var qIdx=0, score=0, answered=false;
+
+function renderQuiz(){
+  var el=document.getElementById('quizBox');
+  if(qIdx>=questions.length){
+    el.innerHTML='<div class="quiz-score"><div class="score-num">'+score+'/'+questions.length+'</div>'
+      +'<div class="score-label">'+(score>=6?'آفرین! عالی بود 🌟':score>=4?'خوب بود 👍':'بیشتر تلاش کن 💪')+'</div></div>'
+      +'<button class="btn-restart" onclick="restartQuiz()">🔄 شروع دوباره</button>';
+    return;
+  }
+  var q=questions[qIdx];
+  answered=false;
+  el.innerHTML='<div class="quiz-card">'
+    +'<div style="font-size:11px;color:var(--text2);margin-bottom:8px">سوال '+(qIdx+1)+' از '+questions.length+'</div>'
+    +'<div style="background:var(--bg4);border-radius:6px;height:4px;margin-bottom:14px">'
+    +'<div style="background:var(--g);height:4px;border-radius:6px;width:'+((qIdx/questions.length)*100)+'%;transition:.5s"></div></div>'
+    +'<div class="quiz-q">'+q.q+'</div>'
+    +'<div class="quiz-opts">'+q.opts.map(function(opt,i){
+      return '<div class="quiz-opt" id="opt-'+i+'" onclick="answer('+i+')">'+opt+'</div>';
+    }).join('')+'</div>'
+    +'<button class="btn-next" id="btnNext" onclick="nextQ()">سوال بعدی ❯</button></div>';
+}
+
+function answer(i){
+  if(answered) return;
+  answered=true;
+  var q=questions[qIdx];
+  document.querySelectorAll('.quiz-opt').forEach(function(el,j){
+    el.style.pointerEvents='none';
+    if(j===q.ans) el.classList.add('correct');
+    else if(j===i) el.classList.add('wrong');
+  });
+  if(i===q.ans) score++;
+  document.getElementById('btnNext').style.display='block';
+}
+function nextQ(){ qIdx++; renderQuiz(); }
+function restartQuiz(){ qIdx=0; score=0; answered=false; renderQuiz(); }
+
+// ===== اپلای کانفیگ =====
+function applyConfig(){
+  try{
+    var c=JSON.parse(localStorage.getItem('appConfig')||'{}');
+    var r=document.documentElement.style;
+    if(c.colorPrimary) r.setProperty('--g',c.colorPrimary);
+    if(c.colorBg)      r.setProperty('--bg',c.colorBg);
+    if(c.colorBg2)     r.setProperty('--bg2',c.colorBg2);
+    if(c.colorText)    r.setProperty('--text',c.colorText);
+  }catch(e){}
+}
+
+applyConfig();
+renderAudios();
+renderVideos();
+renderHadith();
+renderGallery();
+renderQuiz();
+</script>
+</body>
+</html>

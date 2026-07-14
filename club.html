@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>باشگاه مشتریان</title>
+<style>
+:root{--g:#d4af37;--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--text:#f0f0f0;--text2:#888;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,sans-serif;padding-bottom:80px}
+header{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.2);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.h-back{color:var(--g);font-size:20px;text-decoration:none}
+.h-title{color:var(--g);font-size:16px;font-weight:700}
+
+/* کارت عضو */
+.member-card{margin:16px 12px;background:linear-gradient(135deg,#1a1200,#2d2000,#1a1200);border:1px solid rgba(212,175,55,.4);border-radius:20px;padding:20px;position:relative;overflow:hidden}
+.member-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:radial-gradient(circle,rgba(212,175,55,.15),transparent);border-radius:50%}
+.card-logo{font-size:11px;color:rgba(212,175,55,.6);margin-bottom:14px;letter-spacing:2px}
+.card-name{font-size:18px;font-weight:700;color:var(--g);margin-bottom:4px}
+.card-id{font-size:11px;color:rgba(212,175,55,.5);margin-bottom:16px;letter-spacing:1px}
+.card-points-row{display:flex;justify-content:space-between;align-items:flex-end}
+.card-points{font-size:32px;font-weight:700;color:var(--g)}
+.card-points-label{font-size:11px;color:rgba(212,175,55,.6)}
+.card-level{background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);padding:5px 12px;border-radius:20px;font-size:11px;color:var(--g)}
+
+/* پیشرفت */
+.progress-wrap{margin:0 12px 14px;background:var(--bg3);border-radius:var(--radius);padding:14px;border:1px solid rgba(212,175,55,.1)}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:8px}
+.progress-bar{background:var(--bg4);border-radius:10px;height:8px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--g),#b8860b);border-radius:10px;transition:width .8s ease}
+.progress-hint{font-size:11px;color:var(--text2);margin-top:6px;text-align:center}
+
+/* فرم ثبت‌نام */
+#registerBox{margin:0 12px 14px;background:var(--bg3);border-radius:var(--radius);padding:16px;border:1px solid rgba(212,175,55,.12)}
+.reg-title{color:var(--g);font-size:14px;font-weight:700;margin-bottom:14px;text-align:center}
+.field{margin-bottom:12px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px}
+.field input{width:100%;background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:11px 12px;color:var(--text);font-family:Tahoma;font-size:13px;outline:none}
+.field input:focus{border-color:var(--g)}
+.btn-reg{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
+
+/* امتیازها */
+.section-title{font-size:13px;color:var(--text2);margin:0 12px 8px;display:flex;align-items:center;gap:6px}
+.section-title::before{content:'';width:3px;height:14px;background:var(--g);border-radius:2px}
+.history-list{margin:0 12px}
+.history-item{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.08);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.h-info .h-desc{font-size:13px;font-weight:600}
+.h-info .h-date{font-size:11px;color:var(--text2);margin-top:3px}
+.h-points{font-size:16px;font-weight:700}
+.h-points.plus{color:#66bb6a}
+.h-points.minus{color:#ef5350}
+
+/* مزایا */
+.benefits-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 12px 14px}
+.benefit-card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.1);padding:14px;text-align:center}
+.benefit-icon{font-size:28px;margin-bottom:8px}
+.benefit-title{font-size:12px;font-weight:600;margin-bottom:4px}
+.benefit-desc{font-size:11px;color:var(--text2);line-height:1.5}
+
+/* نوار پایین */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid rgba(212,175,55,.2);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;text-decoration:none;color:var(--text2);border:none;background:none;font-family:Tahoma}
+.nav-item.active{color:var(--g)}
+.nav-icon{font-size:22px}.nav-label{font-size:10px}
+
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(67,160,71,.95);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;z-index:9999;transition:.3s}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="home.html" class="h-back">❮</a>
+  <div class="h-title">⭐ باشگاه مشتریان</div>
+</header>
+
+<!-- کارت عضو / فرم ثبت‌نام -->
+<div id="memberSection" style="display:none">
+  <div class="member-card">
+    <div class="card-logo">R·N·A PASS ✦ CLUB</div>
+    <div class="card-name" id="cardName"></div>
+    <div class="card-id" id="cardId"></div>
+    <div class="card-points-row">
+      <div><div class="card-points" id="cardPoints">0</div><div class="card-points-label">امتیاز</div></div>
+      <div class="card-level" id="cardLevel">⭐ عضو عادی</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>پیشرفت به سطح بعدی</span>
+      <span id="progressText"></span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-hint" id="progressHint"></div>
+  </div>
+
+  <div class="section-title">🎁 مزایای عضویت</div>
+  <div class="benefits-grid">
+    <div class="benefit-card"><div class="benefit-icon">🎁</div><div class="benefit-title">تخفیف ویژه</div><div class="benefit-desc">تخفیف روی تمام محصولات</div></div>
+    <div class="benefit-card"><div class="benefit-icon">🚚</div><div class="benefit-title">ارسال رایگان</div><div class="benefit-desc">از ۵۰۰ امتیاز به بالا</div></div>
+    <div class="benefit-card"><div class="benefit-icon">🌟</div><div class="benefit-title">دسترسی زودتر</div><div class="benefit-desc">پیش‌فروش محصولات جدید</div></div>
+    <div class="benefit-card"><div class="benefit-icon">💎</div><div class="benefit-title">جوایز ویژه</div><div class="benefit-desc">قرعه‌کشی ماهانه اعضا</div></div>
+  </div>
+
+  <div class="section-title">📋 تاریخچه امتیاز</div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<!-- فرم ثبت‌نام -->
+<div id="registerSection">
+  <div style="text-align:center;padding:30px 20px 16px">
+    <div style="font-size:52px;margin-bottom:10px">⭐</div>
+    <div style="color:var(--g);font-size:18px;font-weight:700;margin-bottom:6px" id="clubNameTxt">باشگاه مشتریان</div>
+    <div style="color:var(--text2);font-size:12px;line-height:1.8" id="clubDescTxt">با عضویت رایگان از مزایای ویژه بهره‌مند شوید</div>
+  </div>
+  <div id="registerBox">
+    <div class="reg-title">✨ ثبت‌نام رایگان</div>
+    <div class="field"><label>نام و نام خانوادگی</label><input type="text" id="regName" placeholder="نام کامل شما"></div>
+    <div class="field"><label>شماره موبایل</label><input type="tel" id="regPhone" placeholder="09xxxxxxxxx" maxlength="11"></div>
+    <div class="field"><label>شهر</label><input type="text" id="regCity" placeholder="شهر محل سکونت"></div>
+    <button class="btn-reg" onclick="doRegister()">ثبت‌نام در باشگاه ⭐</button>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">خانه</span></a>
+  <a href="products.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">محصولات</span></a>
+  <a href="club.html" class="nav-item active"><span class="nav-icon">⭐</span><span class="nav-label">باشگاه</span></a>
+  <a href="entertainment.html" class="nav-item"><span class="nav-icon">🎵</span><span class="nav-label">سرگرمی</span></a>
+</nav>
+<div id="toast"></div>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+var member  = JSON.parse(localStorage.getItem('member')||'null');
+var config  = JSON.parse(localStorage.getItem('appConfig')||'{}');
+
+function applyConfig(){
+  try{
+    var r=document.documentElement.style;
+    if(config.colorPrimary) r.setProperty('--g',config.colorPrimary);
+    if(config.colorBg)      r.setProperty('--bg',config.colorBg);
+    if(config.colorBg2)     r.setProperty('--bg2',config.colorBg2);
+    if(config.colorText)    r.setProperty('--text',config.colorText);
+    if(config.clubName)     document.getElementById('clubNameTxt').textContent=config.clubName;
+    if(config.clubDesc)     document.getElementById('clubDescTxt').textContent=config.clubDesc;
+  }catch(e){}
+}
+
+function getLevel(pts){
+  if(pts>=1000) return {label:'💎 عضو الماس',next:null,nextPts:0};
+  if(pts>=500)  return {label:'🥇 عضو طلایی',next:'الماس',nextPts:1000};
+  if(pts>=200)  return {label:'🥈 عضو نقره‌ای',next:'طلایی',nextPts:500};
+  return {label:'⭐ عضو عادی',next:'نقره‌ای',nextPts:200};
+}
+
+function renderMember(){
+  if(!member){ document.getElementById('registerSection').style.display='block'; return; }
+  document.getElementById('registerSection').style.display='none';
+  document.getElementById('memberSection').style.display='block';
+  document.getElementById('cardName').textContent  = member.name;
+  document.getElementById('cardId').textContent    = 'RNA-'+member.id;
+  document.getElementById('cardPoints').textContent= member.points||0;
+  var lv = getLevel(member.points||0);
+  document.getElementById('cardLevel').textContent = lv.label;
+  if(lv.next){
+    var pct = Math.min(100, Math.round(((member.points||0)/lv.nextPts)*100));
+    document.getElementById('progressFill').style.width = pct+'%';
+    document.getElementById('progressText').textContent = (member.points||0)+' / '+lv.nextPts;
+    document.getElementById('progressHint').textContent = (lv.nextPts-(member.points||0))+' امتیاز تا سطح '+lv.next;
+  } else {
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('progressText').textContent='حداکثر سطح';
+    document.getElementById('progressHint').textContent='شما به بالاترین سطح رسیده‌اید 🎉';
+  }
+  var hist = member.history||[];
+  var el   = document.getElementById('historyList');
+  if(!hist.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:12px">هنوز تراکنشی ثبت نشده</div>'; return; }
+  el.innerHTML = hist.slice().reverse().map(function(h){
+    return '<div class="history-item"><div class="h-info"><div class="h-desc">'+h.desc+'</div><div class="h-date">'+h.date+'</div></div>'
+      +'<div class="h-points '+(h.pts>0?'plus':'minus')+'">'+(h.pts>0?'+':'')+h.pts+'</div></div>';
+  }).join('');
+}
+
+function doRegister(){
+  var name  = document.getElementById('regName').value.trim();
+  var phone = document.getElementById('regPhone').value.trim();
+  var city  = document.getElementById('regCity').value.trim();
+  if(!name||!phone){ toast('نام و موبایل الزامی است'); return; }
+  if(!/^09\d{9}$/.test(phone)){ toast('شماره موبایل صحیح نیست'); return; }
+  member = {name:name,phone:phone,city:city,id:Date.now().toString().slice(-6),points:10,
+    history:[{desc:'امتیاز خوشامدگویی',pts:10,date:today()}]};
+  localStorage.setItem('member',JSON.stringify(member));
+  // ذخیره در لیست ادمین
+  var members = JSON.parse(localStorage.getItem('clubMembers')||'[]');
+  members.push({name:name,phone:phone,city:city,id:member.id,joinDate:today()});
+  localStorage.setItem('clubMembers',JSON.stringify(members));
+  toast('✅ عضویت با موفقیت ثبت شد!');
+  setTimeout(renderMember,800);
+}
+
+function today(){
+  var d=new Date();
+  return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate();
+}
+function toast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.className='show';
+  setTimeout(function(){ el.className=''; },2500);
+}
+
+applyConfig();
+renderMember();
+</script>
+</body>
+</html>

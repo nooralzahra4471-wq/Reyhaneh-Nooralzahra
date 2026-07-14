@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>پنل مدیریت</title>
+<style>
+
+:root{--g:#d4af37;--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--text:#f0f0f0;--text2:#888;--red:#e53935;--green:#43a047;--radius:12px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,sans-serif;min-height:100vh}
+
+/* ورود */
+#loginScreen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:30px}
+.login-logo{font-size:50px;margin-bottom:10px}
+.login-title{color:var(--g);font-size:20px;font-weight:700;margin-bottom:6px}
+.login-sub{color:var(--text2);font-size:13px;margin-bottom:30px}
+.login-box{width:100%;max-width:320px;background:var(--bg3);border-radius:16px;padding:24px;border:1px solid rgba(212,175,55,.2)}
+.inp{width:100%;background:var(--bg4);border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:12px 14px;color:var(--text);font-family:Tahoma;font-size:15px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px}
+.inp:focus{border-color:var(--g)}
+.inp-label{font-size:12px;color:var(--text2);margin-bottom:6px;display:block;text-align:right}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer}
+.login-err{color:var(--red);font-size:12px;text-align:center;margin-top:8px;display:none}
+
+/* پنل */
+#adminPanel{display:none}
+header{background:linear-gradient(135deg,#1a1200,#0a0a0a);border-bottom:1px solid rgba(212,175,55,.2);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.h-title{color:var(--g);font-size:16px;font-weight:700}
+.h-back{background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);color:var(--g);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;text-decoration:none}
+.logout-btn{background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);color:var(--red);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer}
+
+/* تب‌ها */
+.tabs{display:flex;overflow-x:auto;gap:6px;padding:12px;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.1);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:8px 14px;border-radius:20px;font-size:12px;cursor:pointer;background:var(--bg3);color:var(--text2);border:1px solid transparent;white-space:nowrap;transition:.2s}
+.tab.active{background:rgba(212,175,55,.15);color:var(--g);border-color:rgba(212,175,55,.3)}
+
+/* محتوا */
+.content{padding:14px}
+.section{display:none}
+.section.active{display:block}
+.card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.12);padding:16px;margin-bottom:12px}
+.card-title{color:var(--g);font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.field{margin-bottom:14px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:6px}
+.field input[type=text],.field input[type=password],.field input[type=number],.field textarea,.field select{
+  width:100%;background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:10px 12px;color:var(--text);font-family:Tahoma;font-size:13px;outline:none;transition:.2s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--g)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.7}
+.field select option{background:var(--bg4)}
+
+/* رنگ */
+.color-row{display:flex;align-items:center;gap:10px}
+.color-row input[type=color]{width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:var(--bg4)}
+.color-row input[type=text]{flex:1}
+.color-row .color-preview{width:44px;height:44px;border-radius:8px;border:1px solid rgba(255,255,255,.1)}
+
+/* آپلود عکس */
+.img-upload{border:2px dashed rgba(212,175,55,.3);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:.2s;position:relative}
+.img-upload:hover{border-color:var(--g);background:rgba(212,175,55,.05)}
+.img-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-upload .up-icon{font-size:28px;margin-bottom:6px}
+.img-upload .up-text{font-size:12px;color:var(--text2)}
+.img-preview{width:100%;max-height:180px;object-fit:cover;border-radius:8px;margin-top:10px;display:none}
+
+/* آپلود صدا */
+.audio-upload{border:2px dashed rgba(212,175,55,.3);border-radius:10px;padding:14px;cursor:pointer;position:relative;display:flex;align-items:center;gap:10px}
+.audio-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.audio-name{font-size:12px;color:var(--text2);flex:1}
+audio{width:100%;margin-top:8px;border-radius:8px}
+
+/* محصولات */
+.prod-list{display:flex;flex-direction:column;gap:8px}
+.prod-item{background:var(--bg4);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.06)}
+.prod-img{width:50px;height:50px;border-radius:8px;object-fit:cover;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.prod-info{flex:1}
+.prod-name{font-size:13px;font-weight:600}
+.prod-price{font-size:11px;color:var(--g);margin-top:2px}
+.prod-actions{display:flex;gap:6px}
+.btn-edit{background:rgba(212,175,55,.15);border:none;color:var(--g);padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer}
+.btn-del{background:rgba(229,57,53,.15);border:none;color:var(--red);padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer}
+
+/* دکمه‌های اصلی */
+.btn-save{width:100%;background:linear-gradient(135deg,var(--g),#b8860b);color:#000;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
+.btn-add{background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.3);color:var(--g);border-radius:10px;padding:10px;font-size:13px;cursor:pointer;width:100%;margin-top:8px}
+.btn-danger{width:100%;background:rgba(229,57,53,.1);border:1px solid rgba(229,57,53,.3);color:var(--red);border-radius:10px;padding:12px;font-size:13px;cursor:pointer;margin-top:8px}
+
+/* Toast */
+#toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(67,160,71,.95);color:#fff;padding:12px 24px;border-radius:30px;font-size:13px;z-index:9999;transition:.3s;white-space:nowrap}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#toast.error{background:rgba(229,57,53,.95)}
+
+/* مودال محصول */
+#prodModal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:flex-end;justify-content:center}
+#prodModal.open{display:flex}
+.modal-box{background:var(--bg3);border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:90vh;overflow-y:auto;border-top:1px solid rgba(212,175,55,.2)}
+.modal-title{color:var(--g);font-size:15px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between}
+.modal-close{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer}
+
+/* حدیث لیست */
+.hadith-item{background:var(--bg4);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.hadith-text{font-size:12px;color:var(--text);line-height:1.7;flex:1}
+
+/* گرید رنگ */
+.color-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* toggle */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.toggle-label{font-size:13px;color:var(--text)}
+.toggle{position:relative;width:46px;height:26px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#333;border-radius:13px;cursor:pointer;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:20px;height:20px;right:3px;top:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--g)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(-20px)}
+
+</style>
+</head>
+<body>
+
+<!-- صفحه ورود -->
+<div id="loginScreen" style="position:fixed;inset:0;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:30px">
+  <div style="font-size:50px;margin-bottom:10px">⚙️</div>
+  <div style="color:#d4af37;font-size:20px;font-weight:700;margin-bottom:6px">پنل مدیریت</div>
+  <div style="color:#888;font-size:13px;margin-bottom:30px">ریحانة نورالزهرا</div>
+  <div style="width:100%;max-width:320px;background:#1a1a1a;border-radius:16px;padding:24px;border:1px solid rgba(212,175,55,.2)">
+    <label style="font-size:12px;color:#888;display:block;margin-bottom:6px">رمز عبور ادمین</label>
+    <input id="passInput" type="password" placeholder="••••" maxlength="20"
+      style="width:100%;background:#222;border:1px solid rgba(212,175,55,.2);border-radius:10px;padding:13px;color:#f0f0f0;font-size:16px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:4px;display:block">
+    <button id="loginBtn"
+      style="width:100%;background:linear-gradient(135deg,#d4af37,#b8860b);color:#000;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;cursor:pointer">
+      ورود به پنل
+    </button>
+    <div id="loginErr" style="color:#e53935;font-size:12px;text-align:center;margin-top:8px;display:none">رمز اشتباه است!</div>
+  </div>
+</div>
+
+<!-- پنل اصلی -->
+<div id="adminPanel" style="display:none">
+  <header>
+    <div class="h-title">⚙️ پنل مدیریت</div>
+    <div style="display:flex;gap:8px">
+      <a href="https://tamasha1210-sketch.github.io/RNAZ/home.html" class="h-back" target="_blank">🏠 اپ</a>
+      <a href="https://tamasha1210-sketch.github.io/RNAZ/partner.html" class="h-back" target="_blank" style="background:rgba(212,175,55,.15);border-color:rgba(212,175,55,.4)" onclick="localStorage.removeItem('partnerSession')">🤝 همکار</a>
+      <button class="logout-btn" onclick="doLogout()">خروج</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('appearance')">🎨 ظاهر</div>
+    <div class="tab" onclick="showTab('shop')">🏪 فروشگاه</div>
+    <div class="tab" onclick="showTab('home')">🏠 صفحه اصلی</div>
+    <div class="tab" onclick="showTab('products')">🛍️ محصولات</div>
+    <div class="tab" onclick="showTab('entertainment')">🎵 سرگرمی</div>
+    <div class="tab" onclick="showTab('club')">⭐ باشگاه</div>
+    <div class="tab" onclick="showTab('contact')">📞 تماس</div>
+    <div class="tab" onclick="showTab('about')">ℹ️ درباره</div>
+    <div class="tab" onclick="showTab('partners')">🤝 همکاران</div>
+    <div class="tab" onclick="showTab('ai')">🤖 هوش مصنوعی</div>
+    <div class="tab" onclick="showTab('settings')">🔧 تنظیمات</div>
+  </div>
+
+  <div class="content">
+
+
+    <!-- ===== ظاهر ===== -->
+    <div class="section active" id="sec-appearance">
+      <div class="card">
+        <div class="card-title">🎨 رنگ‌بندی اپ</div>
+        <div class="color-grid">
+          <div class="field">
+            <label>رنگ اصلی (طلایی)</label>
+            <div class="color-row">
+              <input type="color" id="colorPrimary" value="#d4af37" oninput="syncColor('colorPrimary')">
+              <input type="text" id="colorPrimaryTxt" value="#d4af37" oninput="syncColorTxt('colorPrimary')">
+            </div>
+          </div>
+          <div class="field">
+            <label>پس‌زمینه اصلی</label>
+            <div class="color-row">
+              <input type="color" id="colorBg" value="#0a0a0a" oninput="syncColor('colorBg')">
+              <input type="text" id="colorBgTxt" value="#0a0a0a" oninput="syncColorTxt('colorBg')">
+            </div>
+          </div>
+          <div class="field">
+            <label>پس‌زمینه کارت</label>
+            <div class="color-row">
+              <input type="color" id="colorBg2" value="#141414" oninput="syncColor('colorBg2')">
+              <input type="text" id="colorBg2Txt" value="#141414" oninput="syncColorTxt('colorBg2')">
+            </div>
+          </div>
+          <div class="field">
+            <label>رنگ متن</label>
+            <div class="color-row">
+              <input type="color" id="colorText" value="#f0f0f0" oninput="syncColor('colorText')">
+              <input type="text" id="colorTextTxt" value="#f0f0f0" oninput="syncColorTxt('colorText')">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔤 فونت</div>
+        <div class="field">
+          <label>فونت اصلی اپ</label>
+          <select id="fontFamily">
+            <option value="Tahoma,sans-serif">Tahoma (پیش‌فرض)</option>
+            <option value="'Vazirmatn',Tahoma,sans-serif">Vazirmatn</option>
+            <option value="'B Nazanin',Tahoma,serif">B Nazanin</option>
+            <option value="'B Titr',Tahoma,sans-serif">B Titr</option>
+            <option value="'B Mitra',Tahoma,serif">B Mitra</option>
+            <option value="Arial,sans-serif">Arial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>اندازه فونت پایه (px)</label>
+          <input type="number" id="fontSize" value="14" min="10" max="22">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📐 شکل و فرم</div>
+        <div class="field">
+          <label>گوشه‌های گرد (px)</label>
+          <input type="number" id="borderRadius" value="14" min="0" max="30">
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">حالت تاریک</span>
+          <label class="toggle"><input type="checkbox" id="darkMode" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">انیمیشن‌ها</span>
+          <label class="toggle"><input type="checkbox" id="animations" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveSection('appearance')">💾 ذخیره ظاهر</button>
+    </div>
+
+    <!-- ===== فروشگاه ===== -->
+    <div class="section" id="sec-shop">
+      <div class="card">
+        <div class="card-title">🏪 اطلاعات فروشگاه</div>
+        <div class="field"><label>نام فروشگاه</label><input type="text" id="shopName" value="ریحانة نورالزهرا"></div>
+        <div class="field"><label>زیرعنوان</label><input type="text" id="shopSub" value="تولیدی محصولات مذهبی"></div>
+        <div class="field"><label>شعار فروشگاه</label><input type="text" id="shopSlogan" value="کیفیت، اصالت، معنویت"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🖼️ لوگوی فروشگاه</div>
+        <div class="img-upload" onclick="document.getElementById('logoFile').click()">
+          <input type="file" id="logoFile" accept="image/*" onchange="loadImg('logoFile','logoPreview','logoImg')">
+          <div class="up-icon">📷</div>
+          <div class="up-text">برای تغییر لوگو کلیک کنید</div>
+          <img class="img-preview" id="logoPreview">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔔 صدای اپ</div>
+        <div class="field"><label>صدای خوشامدگویی</label>
+          <div class="audio-upload">
+            <input type="file" id="welcomeAudio" accept="audio/*" onchange="loadAudio('welcomeAudio','welcomeAudioEl','welcomeAudioData')">
+            <span>🎵</span><span class="audio-name" id="welcomeAudioName">فایل انتخاب نشده</span>
+          </div>
+          <audio id="welcomeAudioEl" controls style="display:none;margin-top:8px;width:100%"></audio>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">پخش خودکار صدا</span>
+          <label class="toggle"><input type="checkbox" id="autoPlayAudio"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveSection('shop')">💾 ذخیره اطلاعات</button>
+    </div>
+
+    <!-- ===== صفحه اصلی ===== -->
+    <div class="section" id="sec-home">
+      <div class="card">
+        <div class="card-title">🖼️ بنر اصلی</div>
+        <div class="field"><label>عنوان بنر</label><input type="text" id="bannerTitle" value="تخفیف ویژه محرم"></div>
+        <div class="field"><label>توضیح بنر</label><input type="text" id="bannerDesc" value="محصولات مذهبی با کیفیت عالی"></div>
+        <div class="field"><label>متن دکمه بنر</label><input type="text" id="bannerBtn" value="مشاهده محصولات"></div>
+        <div class="field"><label>عکس بنر</label>
+          <div class="img-upload">
+            <input type="file" id="bannerFile" accept="image/*" onchange="loadImg('bannerFile','bannerPreview','bannerImg')">
+            <div class="up-icon">🖼️</div><div class="up-text">آپلود عکس بنر</div>
+            <img class="img-preview" id="bannerPreview">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📢 اطلاعیه</div>
+        <div class="field"><label>عنوان اطلاعیه</label><input type="text" id="noticeTitle" value="اطلاعیه فروشگاه"></div>
+        <div class="field"><label>متن اطلاعیه</label><textarea id="noticeText">خوش آمدید به فروشگاه ریحانة نورالزهرا</textarea></div>
+        <div class="toggle-row">
+          <span class="toggle-label">نمایش اطلاعیه</span>
+          <label class="toggle"><input type="checkbox" id="showNotice" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 محصولات پرفروش در خانه</div>
+        <div class="toggle-row">
+          <span class="toggle-label">نمایش پرفروش‌ها</span>
+          <label class="toggle"><input type="checkbox" id="showTopProducts" checked><span class="toggle-slider"></span></label>
+        </div>
+        <div class="field" style="margin-top:10px"><label>تعداد نمایش</label>
+          <select id="topProductsCount">
+            <option value="4">۴ عدد</option>
+            <option value="6">۶ عدد</option>
+            <option value="8">۸ عدد</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveSection('home')">💾 ذخیره صفحه اصلی</button>
+    </div>
+
+    <!-- ===== محصولات ===== -->
+    <div class="section" id="sec-products">
+      <div class="card">
+        <div class="card-title">🗂️ مدیریت دسته‌بندی (۳ سطح)</div>
+        <div id="catTree"></div>
+        <button class="btn-add" onclick="addMainCat()">➕ دسته اصلی</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 لیست محصولات <span id="prodCount" style="color:var(--text2);font-weight:400;font-size:11px"></span></div>
+        <div id="prodList" class="prod-list"></div>
+        <button class="btn-add" onclick="openProdModal(-1)">➕ افزودن محصول جدید</button>
+      </div>
+    </div>
+
+    <!-- ===== سرگرمی ===== -->
+    <div class="section" id="sec-entertainment">
+      <div class="card">
+        <div class="card-title">🎵 مداحی</div>
+        <div id="audioList" class="prod-list"></div>
+        <div class="field" style="margin-top:10px">
+          <label>افزودن فایل مداحی</label>
+          <div class="audio-upload">
+            <input type="file" id="newAudio" accept="audio/*" onchange="addAudio()">
+            <span>🎵</span><span class="audio-name">برای آپلود کلیک کنید</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📖 حدیث روز</div>
+        <div id="hadithList"></div>
+        <div class="field" style="margin-top:10px"><label>حدیث جدید</label><textarea id="newHadith" placeholder="متن حدیث را اینجا بنویسید..."></textarea></div>
+        <div class="field"><label>منبع</label><input type="text" id="newHadithSource" placeholder="مثلاً: امام علی (ع)"></div>
+        <button class="btn-add" onclick="addHadith()">➕ افزودن حدیث</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🖼️ گالری تصاویر</div>
+        <div id="galleryList" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px"></div>
+        <div class="img-upload">
+          <input type="file" id="galleryFile" accept="image/*" multiple onchange="addGallery()">
+          <div class="up-icon">🖼️</div><div class="up-text">آپلود عکس گالری (چند عکس)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎬 آپلود کلیپ ویدیو</div>
+        <div id="videoList" class="prod-list"></div>
+        <div class="field" style="margin-top:10px">
+          <label>افزودن کلیپ (mp4، حداکثر ۵۰ مگابایت)</label>
+          <div class="audio-upload">
+            <input type="file" id="newVideo" accept="video/*" onchange="addVideo()">
+            <span>🎬</span><span class="audio-name" id="videoName">برای آپلود کلیک کنید</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎮 بازی</div>
+        <div class="field"><label>نوع بازی</label>
+          <select id="gameType">
+            <option value="quiz">آزمون معلومات دینی</option>
+            <option value="memory">بازی حافظه</option>
+            <option value="none">غیرفعال</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveSection('entertainment')">💾 ذخیره سرگرمی</button>
+    </div>
+
+    <!-- ===== باشگاه ===== -->
+    <div class="section" id="sec-club">
+      <div class="card">
+        <div class="card-title">⭐ تنظیمات باشگاه</div>
+        <div class="field"><label>نام باشگاه</label><input type="text" id="clubName" value="باشگاه مشتریان RNA Pass"></div>
+        <div class="field"><label>توضیح باشگاه</label><textarea id="clubDesc">با هر خرید امتیاز جمع کنید و از تخفیف‌های ویژه بهره‌مند شوید.</textarea></div>
+        <div class="field"><label>امتیاز به ازای هر ۱۰۰۰ تومان</label><input type="number" id="pointRate" value="1" min="1"></div>
+        <div class="field"><label>حداقل امتیاز برای تخفیف</label><input type="number" id="minPoint" value="100" min="10"></div>
+        <div class="toggle-row">
+          <span class="toggle-label">فعال بودن باشگاه</span>
+          <label class="toggle"><input type="checkbox" id="clubActive" checked><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👥 لیست اعضا</div>
+        <div id="memberList" style="font-size:12px;color:var(--text2);text-align:center;padding:20px">هنوز عضوی ثبت‌نام نکرده</div>
+      </div>
+      <button class="btn-save" onclick="saveSection('club')">💾 ذخیره باشگاه</button>
+    </div>
+
+    <!-- ===== تماس ===== -->
+    <div class="section" id="sec-contact">
+      <div class="card">
+        <div class="card-title">📞 اطلاعات تماس</div>
+        <div class="field"><label>شماره تلفن ۱</label><input type="text" id="phone1" value="09122534471"></div>
+        <div class="field"><label>شماره تلفن ۲</label><input type="text" id="phone2"></div>
+        <div class="field"><label>آدرس</label><textarea id="address" placeholder="آدرس کامل فروشگاه"></textarea></div>
+        <div class="field"><label>ساعات کاری</label><input type="text" id="workHours" value="شنبه تا پنجشنبه ۹ الی ۲۱"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🌐 شبکه‌های اجتماعی</div>
+        <div class="field"><label>واتساپ</label><input type="text" id="whatsapp" placeholder="شماره واتساپ"></div>
+        <div class="field"><label>اینستاگرام</label><input type="text" id="instagram" placeholder="آدرس اینستاگرام"></div>
+        <div class="field"><label>تلگرام</label><input type="text" id="telegram" placeholder="آیدی تلگرام"></div>
+        <div class="field"><label>روبیکا</label><input type="text" id="rubika" placeholder="آیدی روبیکا"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📨 تنظیمات ایتا</div>
+        <div style="font-size:12px;color:var(--text2);line-height:2;margin-bottom:12px;background:rgba(212,175,55,.05);border-radius:8px;padding:10px;border:1px solid rgba(212,175,55,.15)">
+          💡 برای ارسال خودکار به ایتا، ربات رایگان بسازید:<br>
+          ۱. در ایتا به <b style="color:var(--g)">@eitaa_kbot</b> پیام بدید<br>
+          ۲. دستور /newbot رو بزنید<br>
+          ۳. توکن رو اینجا وارد کنید
+        </div>
+        <div class="field"><label>توکن ربات ایتا (رایگان)</label><input type="text" id="eitaaToken" placeholder="توکن ربات ایتا"></div>
+        <div class="field"><label>آیدی کانال یا چت</label><input type="text" id="eitaaChatId" value="@Reihanenooralzahra" placeholder="@username"></div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.9;margin-top:4px">
+          📨 ثبت‌نام باشگاه → اعلان به ایتا<br>
+          🔒 لینک کانال در اپ مشتری نمایش نمی‌شود
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveSection('contact')">💾 ذخیره اطلاعات تماس</button>
+    </div>
+
+    <!-- ===== درباره ما ===== -->
+    <div class="section" id="sec-about">
+      <div class="card">
+        <div class="card-title">ℹ️ معرفی فروشگاه</div>
+        <div class="field"><label>متن معرفی</label><textarea id="aboutText" style="min-height:120px" placeholder="درباره فروشگاه بنویسید..."></textarea></div>
+        <div class="field"><label>پیام مدیریت</label><textarea id="managerMsg" style="min-height:100px" placeholder="پیام مدیریت..."></textarea></div>
+        <div class="field"><label>نام مدیر</label><input type="text" id="managerName" value="مهندس حسینی"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">✅ مزایای ما</div>
+        <div id="advantageList" class="prod-list"></div>
+        <button class="btn-add" onclick="addAdvantage()">➕ افزودن مزیت</button>
+      </div>
+      <button class="btn-save" onclick="saveSection('about')">💾 ذخیره درباره ما</button>
+    </div>
+
+    <!-- ===== تنظیمات ===== -->
+    <div class="section" id="sec-settings">
+      <div class="card">
+        <div class="card-title">🔒 تغییر رمز ادمین</div>
+        <div class="field"><label>رمز فعلی</label><input type="password" id="oldPass" placeholder="رمز فعلی"></div>
+        <div class="field"><label>رمز جدید</label><input type="password" id="newPass" placeholder="رمز جدید"></div>
+        <div class="field"><label>تکرار رمز جدید</label><input type="password" id="newPass2" placeholder="تکرار رمز جدید"></div>
+        <button class="btn-save" onclick="changePass()">🔒 تغییر رمز</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💾 پشتیبان‌گیری</div>
+        <button class="btn-save" onclick="exportData()">📤 دانلود نسخه پشتیبان</button>
+        <div style="margin-top:10px">
+          <div class="field"><label>بارگذاری پشتیبان</label>
+            <input type="file" id="importFile" accept=".json" onchange="importData()" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px;width:100%;color:var(--text)">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔧 اطلاعات اپ</div>
+        <div style="font-size:12px;color:var(--text2);line-height:2">
+          <div>نام اپ: ریحانة نورالزهرا</div>
+          <div>نسخه: ۱.۰.۰</div>
+          <div>طراح: مهندس حسینی</div>
+          <div id="storageInfo"></div>
+        </div>
+      </div>
+
+      <button class="btn-danger" onclick="resetAll()">⚠️ بازنشانی همه تنظیمات</button>
+    </div>
+
+  
+    <!-- ===== هوش مصنوعی ===== -->
+    <div class="section" id="sec-ai">
+
+      <div class="card">
+        <div class="card-title">✨ ویرایش عکس با هوش مصنوعی</div>
+        <div class="field">
+          <label>۱. عکس محصول خود را آپلود کنید</label>
+          <div class="img-upload">
+            <input type="file" id="aiUploadFile" accept="image/*" onchange="loadAIUpload()">
+            <div class="up-icon">📷</div>
+            <div class="up-text">عکس محصول را انتخاب کنید</div>
+            <img class="img-preview" id="aiUploadPreview">
+          </div>
+        </div>
+        <div class="field">
+          <label>۲. نوع پس‌زمینه دلخواه</label>
+          <select id="aiBgStyle">
+            <option value="gold">✨ طلایی اسلامی</option>
+            <option value="dark">🌙 تیره لاکچری</option>
+            <option value="white">⬜ سفید حرفه‌ای</option>
+            <option value="nature">🌿 طبیعت سبز</option>
+            <option value="gradient">🌈 گرادیان رنگی</option>
+            <option value="marble">🪨 مرمر سفید</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>۳. متن روی عکس (اختیاری)</label>
+          <input type="text" id="aiTextOverlay" placeholder="مثلاً: تخفیف ویژه | ریحانة نورالزهرا">
+        </div>
+        <button class="btn-save" onclick="editWithAI()">✨ ویرایش و زیباسازی</button>
+      </div>
+
+      <div class="card" id="aiResultCard" style="display:none">
+        <div class="card-title">🖼️ نتیجه ویرایش</div>
+        <canvas id="aiCanvas" style="width:100%;border-radius:10px;display:block"></canvas>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">
+          <button class="btn-edit" onclick="useAIAsLogo()" style="padding:10px;font-size:12px">🖼️ لوگو</button>
+          <button class="btn-edit" onclick="useAIAsBanner()" style="padding:10px;font-size:12px">📢 بنر</button>
+          <button class="btn-edit" onclick="downloadAIImg()" style="padding:10px;font-size:12px">⬇️ دانلود</button>
+        </div>
+        <button class="btn-add" onclick="editWithAI()" style="margin-top:8px">🔄 دوباره ویرایش</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🤖 تولید عکس با متن</div>
+        <div class="field">
+          <label>توضیح محصول (فارسی)</label>
+          <input type="text" id="aiPromptFa" placeholder="مثلاً: تسبیح کریستال طلایی زیبا">
+        </div>
+        <div class="field">
+          <label>سبک تصویر</label>
+          <select id="aiStyle">
+            <option value="product photo, white background, professional, high quality">عکس محصول</option>
+            <option value="islamic art, golden decorative, elegant, luxury">اسلامی طلایی</option>
+            <option value="store banner, promotional, colorful, persian style">بنر تبلیغاتی</option>
+            <option value="religious, spiritual, warm lighting, beautiful">مذهبی معنوی</option>
+          </select>
+        </div>
+        <button class="btn-save" onclick="generateAI()">🤖 تولید تصویر</button>
+      </div>
+
+      <div class="card" id="aiResultCard" style="display:none">
+        <div class="card-title">✨ تصویر تولید شده</div>
+        <div style="text-align:center;margin-bottom:12px">
+          <img id="aiResultImg" src="" style="width:100%;border-radius:10px;display:none">
+          <div id="aiLoading" style="padding:40px;color:var(--text2)">
+            <div style="font-size:36px;margin-bottom:10px">⏳</div>
+            <div>در حال تولید تصویر...</div>
+            <div style="font-size:11px;margin-top:6px">ممکنه ۱۰-۳۰ ثانیه طول بکشه</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <button class="btn-edit" onclick="useAsLogo()" style="padding:10px;font-size:12px">🖼️ لوگو</button>
+          <button class="btn-edit" onclick="useAsBanner()" style="padding:10px;font-size:12px">📢 بنر</button>
+          <button class="btn-edit" onclick="downloadAI()" style="padding:10px;font-size:12px">⬇️ دانلود</button>
+        </div>
+        <button class="btn-add" onclick="generateAI()" style="margin-top:8px">🔄 تولید مجدد</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 تولید عکس برای محصولات</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.9">
+          برای هر محصول می‌تونی یه عکس حرفه‌ای بسازی و مستقیم توی محصول ذخیره کنی
+        </div>
+        <div class="field">
+          <label>نام محصول برای عکس</label>
+          <input type="text" id="aiProdName" placeholder="مثلاً: مهر نماز خاک کربلا">
+        </div>
+        <button class="btn-save" onclick="generateProdImg()">📸 ساخت عکس محصول</button>
+        <div id="aiProdResult" style="margin-top:12px;display:none">
+          <img id="aiProdImg" src="" style="width:100%;border-radius:10px;margin-bottom:8px">
+          <button class="btn-edit" onclick="saveProdImgToNew()" style="width:100%;padding:10px">➕ افزودن به محصولات جدید</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🎨 ساخت بنر تبلیغاتی</div>
+        <div class="field"><label>عنوان بنر</label><input type="text" id="aiBannerTitle" placeholder="مثلاً: تخفیف ویژه محرم"></div>
+        <div class="field"><label>توضیح بنر</label><input type="text" id="aiBannerDesc" placeholder="مثلاً: محصولات مذهبی با کیفیت"></div>
+        <button class="btn-save" onclick="generateBanner()">🖼️ ساخت بنر</button>
+        <div id="aiBannerResult" style="margin-top:12px;display:none">
+          <img id="aiBannerImg" src="" style="width:100%;border-radius:10px;margin-bottom:8px">
+          <button class="btn-edit" onclick="useBannerImg()" style="width:100%;padding:10px">✅ استفاده به عنوان بنر صفحه اصلی</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💡 راهنمای تولید عکس</div>
+        <div style="font-size:12px;color:var(--text2);line-height:2">
+          <div>✅ هرچه توضیح دقیق‌تر باشه، عکس بهتره</div>
+          <div>✅ از کلماتی مثل "زیبا"، "حرفه‌ای"، "با کیفیت" استفاده کن</div>
+          <div>✅ اگه عکس مناسب نبود، دوباره تولید کن</div>
+          <div>✅ سرویس کاملاً رایگان و بدون محدودیته</div>
+          <div>⚠️ برای بهترین نتیجه به اینترنت نیاز داره</div>
+        </div>
+      </div>
+
+    </div><!-- /sec-ai -->
+
+    <!-- ===== همکاران ===== -->
+    <div class="section" id="sec-partners">
+
+      <div class="card">
+        <div class="card-title">🔗 لینک‌های ایتا</div>
+        <div id="eitaaLinkList" class="prod-list"></div>
+        <div style="margin-top:10px">
+          <div class="field"><label>توکن ربات</label><input type="text" id="newEitaaToken" placeholder="توکن از @همیار_ربات"></div>
+          <div class="field"><label>آیدی کانال/گروه</label><input type="text" id="newEitaaChatId" placeholder="@username یا chat_id"></div>
+          <div class="field"><label>نام (برای شناسایی)</label><input type="text" id="newEitaaName" placeholder="مثلاً: کانال شریک اول"></div>
+        </div>
+        <button class="btn-add" onclick="addEitaaLink()">➕ افزودن لینک ایتا</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🤝 مدیریت همکاران <span id="partnerCount" style="color:var(--text2);font-weight:400;font-size:11px"></span></div>
+        <div id="partnerList" class="prod-list"></div>
+        <div style="margin-top:12px;background:var(--bg4);border-radius:10px;padding:14px;border:1px solid rgba(255,255,255,.06)">
+          <div class="field"><label>نام همکار</label><input type="text" id="newPartnerName" placeholder="نام و نام خانوادگی"></div>
+          <div class="field"><label>شماره موبایل</label><input type="text" id="newPartnerPhone" placeholder="09xxxxxxxxx"></div>
+          <div class="field"><label>توضیحات</label><input type="text" id="newPartnerNote" placeholder="اختیاری"></div>
+          <button class="btn-save" onclick="addPartner()">➕ افزودن همکار و صدور رمز</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 آخرین ورودهای همکاران</div>
+        <div id="partnerLogs" style="font-size:12px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 سفارشات همکاران</div>
+        <div id="partnerOrders"></div>
+      </div>
+
+    </div>
+
+    <!-- ===== آمار ===== -->
+    <div class="section" id="sec-stats">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div class="card" style="text-align:center;padding:18px">
+          <div style="font-size:32px;color:var(--g);font-weight:700" id="statVisits">0</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">بازدید کل</div>
+        </div>
+        <div class="card" style="text-align:center;padding:18px">
+          <div style="font-size:32px;color:var(--g);font-weight:700" id="statMembers">0</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">اعضای باشگاه</div>
+        </div>
+        <div class="card" style="text-align:center;padding:18px">
+          <div style="font-size:32px;color:var(--g);font-weight:700" id="statPartners">0</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">همکار فعال</div>
+        </div>
+        <div class="card" style="text-align:center;padding:18px">
+          <div style="font-size:32px;color:var(--g);font-weight:700" id="statOrders">0</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:4px">سفارش همکاران</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📈 آمار امروز</div>
+        <div id="todayStats" style="font-size:13px;color:var(--text2);line-height:2.2"></div>
+      </div>
+      <div class="toggle-row" style="padding:14px 0">
+        <span class="toggle-label">نمایش آمار بازدید در صفحه عمومی</span>
+        <label class="toggle"><input type="checkbox" id="showPublicStats" onchange="savePublicStats()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="prodModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="modalTitle">محصول جدید</span>
+      <button class="modal-close" onclick="closeProdModal()">✕</button>
+    </div>
+    <div class="field"><label>نام محصول</label><input type="text" id="pName" placeholder="نام محصول"></div>
+    <div class="field"><label>قیمت (تومان)</label><input type="text" id="pPrice" placeholder="مثلاً: ۱۲۰,۰۰۰"></div>
+    <div class="field"><label>دسته‌بندی</label><select id="pCat"><option value="">بدون دسته</option></select></div>
+    <div class="field"><label>توضیح</label><textarea id="pDesc" placeholder="توضیح محصول..."></textarea></div>
+    <div class="field"><label>عکس محصول</label>
+      <div class="img-upload" onclick="document.getElementById('pImgFile').click()" style="cursor:pointer">
+        <input type="file" id="pImgFile" accept="image/*" onchange="loadImg('pImgFile','pImgPreview','pImgData')" style="display:none">
+        <div class="up-icon">📷</div>
+        <div class="up-text">کلیک کنید تا عکس انتخاب کنید</div>
+        <img class="img-preview" id="pImgPreview">
+      </div>
+      <button class="btn-add" onclick="useAIImgForProd()" style="margin-top:6px">🤖 استفاده از عکس هوش مصنوعی</button>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">پرفروش</span>
+      <label class="toggle"><input type="checkbox" id="pTopSell"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">پرفروش</span>
+      <label class="toggle"><input type="checkbox" id="pTopSell"><span class="toggle-slider"></span></label>
+    </div>
+    <div class="toggle-row" style="margin-bottom:14px">
+      <span class="toggle-label">موجود</span>
+      <label class="toggle"><input type="checkbox" id="pAvailable" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="card" style="margin-top:10px;border:1px solid rgba(212,175,55,.2)">
+      <div class="card-title" style="margin-bottom:10px">💰 قیمت همکاری (بازه‌ای)</div>
+      <div id="tierList"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+        <input type="number" id="tierFrom" placeholder="از" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;color:var(--text);font-size:12px;outline:none">
+        <input type="number" id="tierTo" placeholder="تا" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;color:var(--text);font-size:12px;outline:none">
+        <input type="text" id="tierPrice" placeholder="قیمت" style="background:var(--bg4);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px;color:var(--text);font-size:12px;outline:none">
+      </div>
+      <button class="btn-add" onclick="addTier()" style="margin-top:6px">➕ افزودن بازه</button>
+    </div>
+    <button class="btn-save" onclick="saveProd()">💾 ذخیره محصول</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+var DEFAULT_PASS = '1234';
+var editingProd = -1;
+var tempImgs = {};
+
+// ===== ورود - ساده و مطمئن =====
+document.getElementById('loginBtn').addEventListener('click', function() {
+  doLogin();
+});
+
+document.getElementById('passInput').addEventListener('keyup', function(e) {
+  if(e.key === 'Enter') doLogin();
+});
+
+function doLogin(){
+  var input = document.getElementById('passInput');
+  var p = input.value;
+  var saved = localStorage.getItem('adminPass') || DEFAULT_PASS;
+  if(p === saved){
+    localStorage.setItem('adminLoggedIn','1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadAll();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    input.value = '';
+    input.focus();
+  }
+}
+
+function doLogout(){
+  localStorage.removeItem('adminLoggedIn');
+  location.reload();
+}
+
+// چک ورود قبلی
+(function(){
+  if(localStorage.getItem('adminLoggedIn')==='1'){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    loadAll();
+  }
+})();
+
+
+var DEFAULT_PASS = '1234';
+var editingProd = -1;
+var tempImgs = {};
+
+// ===== ورود =====
+function doLogin(){
+  var p = document.getElementById('passInput').value;
+  var saved = localStorage.getItem('adminPass') || DEFAULT_PASS;
+  if(p === saved){
+    localStorage.setItem('adminLoggedIn','1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadAll();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function doLogout(){
+  localStorage.removeItem('adminLoggedIn');
+  location.reload();
+}
+
+// چک ورود
+if(localStorage.getItem('adminLoggedIn')==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('adminPanel').style.display='block';
+  loadAll();
+}
+
+// ===== تب =====
+function showTab(name){
+  document.querySelectorAll('.tab').forEach(function(t,i){
+    var tabs=['appearance','shop','home','products','entertainment','club','contact','about','settings','ai','partners','stats'];
+    t.classList.toggle('active', tabs[i]===name);
+  });
+  document.querySelectorAll('.section').forEach(function(s){
+    s.classList.remove('active');
+  });
+  document.getElementById('sec-'+name).classList.add('active');
+}
+
+// ===== رنگ =====
+function syncColor(id){
+  var v = document.getElementById(id).value;
+  document.getElementById(id+'Txt').value = v;
+}
+function syncColorTxt(id){
+  var v = document.getElementById(id+'Txt').value;
+  if(/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(id).value = v;
+}
+
+// ===== آپلود عکس =====
+function loadImg(fileId, previewId, dataKey){
+  var file = document.getElementById(fileId).files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var prev = document.getElementById(previewId);
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    tempImgs[dataKey] = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== آپلود صدا =====
+function loadAudio(fileId, audioElId, dataKey){
+  var file = document.getElementById(fileId).files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var el = document.getElementById(audioElId);
+    el.src = e.target.result;
+    el.style.display = 'block';
+    tempImgs[dataKey] = e.target.result;
+    document.getElementById('welcomeAudioName').textContent = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ===== ذخیره بخش‌ها =====
+function getConfig(){ return JSON.parse(localStorage.getItem('appConfig')||'{}'); }
+function setConfig(c){ localStorage.setItem('appConfig', JSON.stringify(c)); }
+
+function saveSection(sec){
+  var c = getConfig();
+  if(sec==='appearance'){
+    c.colorPrimary  = document.getElementById('colorPrimary').value;
+    c.colorBg       = document.getElementById('colorBg').value;
+    c.colorBg2      = document.getElementById('colorBg2').value;
+    c.colorText     = document.getElementById('colorText').value;
+    c.fontFamily    = document.getElementById('fontFamily').value;
+    c.fontSize      = document.getElementById('fontSize').value;
+    c.borderRadius  = document.getElementById('borderRadius').value;
+    c.darkMode      = document.getElementById('darkMode').checked;
+    c.animations    = document.getElementById('animations').checked;
+  }
+  if(sec==='shop'){
+    c.shopName      = document.getElementById('shopName').value;
+    c.shopSub       = document.getElementById('shopSub').value;
+    c.shopSlogan    = document.getElementById('shopSlogan').value;
+    if(tempImgs.logoImg)         c.logoImg         = tempImgs.logoImg;
+    if(tempImgs.welcomeAudioData) c.welcomeAudio   = tempImgs.welcomeAudioData;
+    c.autoPlayAudio = document.getElementById('autoPlayAudio').checked;
+  }
+  if(sec==='home'){
+    c.bannerTitle   = document.getElementById('bannerTitle').value;
+    c.bannerDesc    = document.getElementById('bannerDesc').value;
+    c.bannerBtn     = document.getElementById('bannerBtn').value;
+    if(tempImgs.bannerImg) c.bannerImg = tempImgs.bannerImg;
+    c.noticeTitle   = document.getElementById('noticeTitle').value;
+    c.noticeText    = document.getElementById('noticeText').value;
+    c.showNotice    = document.getElementById('showNotice').checked;
+    c.showTopProducts = document.getElementById('showTopProducts').checked;
+    c.topProductsCount = document.getElementById('topProductsCount').value;
+  }
+  if(sec==='entertainment'){
+    c.gameType      = document.getElementById('gameType').value;
+  }
+  if(sec==='club'){
+    c.clubName      = document.getElementById('clubName').value;
+    c.clubDesc      = document.getElementById('clubDesc').value;
+    c.pointRate     = document.getElementById('pointRate').value;
+    c.minPoint      = document.getElementById('minPoint').value;
+    c.clubActive    = document.getElementById('clubActive').checked;
+  }
+  if(sec==='contact'){
+    c.phone1        = document.getElementById('phone1').value;
+    c.phone2        = document.getElementById('phone2').value;
+    c.address       = document.getElementById('address').value;
+    c.workHours     = document.getElementById('workHours').value;
+    c.whatsapp      = document.getElementById('whatsapp').value;
+    c.instagram     = document.getElementById('instagram').value;
+    c.telegram      = document.getElementById('telegram').value;
+    c.rubika        = document.getElementById('rubika').value;
+    c.eitaaToken    = document.getElementById('eitaaToken').value;
+    c.eitaaChatId   = document.getElementById('eitaaChatId').value;
+  }
+  if(sec==='about'){
+    c.aboutText     = document.getElementById('aboutText').value;
+    c.managerMsg    = document.getElementById('managerMsg').value;
+    c.managerName   = document.getElementById('managerName').value;
+  }
+  setConfig(c);
+  toast('✅ ذخیره شد!');
+}
+
+// ===== محصولات =====
+function getProds(){ return JSON.parse(localStorage.getItem('products')||'[]'); }
+function setProds(p){ localStorage.setItem('products', JSON.stringify(p)); }
+
+function renderProds(){
+  var prods = getProds();
+  document.getElementById('prodCount').textContent = '('+prods.length+' محصول)';
+  var el = document.getElementById('prodList');
+  if(!prods.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:12px">محصولی ثبت نشده</div>'; return; }
+  el.innerHTML = prods.map(function(p,i){
+    return '<div class="prod-item">'
+      +(p.img?'<img class="prod-img" src="'+p.img+'" style="width:50px;height:50px;border-radius:8px;object-fit:cover">'
+             :'<div class="prod-img">🛍️</div>')
+      +'<div class="prod-info"><div class="prod-name">'+p.name+'</div><div class="prod-price">'+p.price+' تومان'+(p.topSell?' ⭐':'')+'</div></div>'
+      +'<div class="prod-actions">'
+      +'<button class="btn-edit" onclick="openProdModal('+i+')">✏️ ویرایش</button>'
+      +'<button class="btn-del" onclick="delProd('+i+')">🗑️</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function openProdModal(idx){
+  editingProd = idx;
+  tempImgs.pImgData = null;
+  document.getElementById('pImgPreview').style.display='none';
+  if(idx===-1){
+    document.getElementById('modalTitle').textContent='محصول جدید';
+    ['pName','pPrice','pDesc'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('pTopSell').checked=false;
+    document.getElementById('pAvailable').checked=true;
+  } else {
+    var p = getProds()[idx];
+    document.getElementById('modalTitle').textContent='ویرایش محصول';
+    document.getElementById('pName').value  = p.name||'';
+    document.getElementById('pPrice').value = p.price||'';
+    document.getElementById('pDesc').value  = p.desc||'';
+    document.getElementById('pTopSell').checked    = !!p.topSell;
+    document.getElementById('pAvailable').checked  = p.available!==false;
+    if(p.img){
+      document.getElementById('pImgPreview').src=p.img;
+      document.getElementById('pImgPreview').style.display='block';
+      tempImgs.pImgData = p.img;
+    }
+  }
+  // لود بازه‌های قیمتی
+  currentTiers = (idx>=0 && prods[idx] && prods[idx].partnerTiers) ? prods[idx].partnerTiers.slice() : [];
+  renderTiers();
+  document.getElementById('prodModal').classList.add('open');
+}
+
+function closeProdModal(){ document.getElementById('prodModal').classList.remove('open'); }
+
+function saveProd(){
+  var prods = getProds();
+  var obj = {
+    name:      document.getElementById('pName').value,
+    price:     document.getElementById('pPrice').value,
+    desc:      document.getElementById('pDesc').value,
+    topSell:   document.getElementById('pTopSell').checked,
+    available: document.getElementById('pAvailable').checked,
+    img:       tempImgs.pImgData || (editingProd>=0 ? prods[editingProd].img : null),
+    partnerTiers: currentTiers.slice()
+  };
+  if(!obj.name){ toast('نام محصول را وارد کنید','error'); return; }
+  if(editingProd===-1) prods.push(obj);
+  else prods[editingProd] = obj;
+  setProds(prods);
+
+  // آپدیت پرفروش‌ها در config
+  var c = getConfig();
+  c.topProducts = prods.filter(function(p){ return p.topSell; }).map(function(p){ return {name:p.name,price:p.price,img:p.img}; });
+  setConfig(c);
+
+  closeProdModal();
+  renderProds();
+  toast('✅ محصول ذخیره شد');
+}
+
+function delProd(i){
+  if(!confirm('حذف شود؟')) return;
+  var prods = getProds();
+  prods.splice(i,1);
+  setProds(prods);
+  renderProds();
+  toast('🗑️ حذف شد');
+}
+
+// ===== دسته‌بندی ۳ سطحه =====
+function getCats2(){ return JSON.parse(localStorage.getItem('cats2')||'null') || []; }
+function setCats2(c){ localStorage.setItem('cats2', JSON.stringify(c)); }
+
+function renderCats(){
+  var cats = getCats2();
+  var el = document.getElementById('catTree');
+  if(!cats.length){
+    el.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:12px">دسته‌ای ثبت نشده</div>';
+    updateCatSelect([]); return;
+  }
+  var html = '';
+  cats.forEach(function(cat, ci){
+    html += '<div style="background:var(--bg4);border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid rgba(212,175,55,.1)">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    html += '<span style="font-size:13px;font-weight:700;color:var(--g)">'+(cat.icon||'📦')+' '+cat.name+'</span>';
+    html += '<div style="display:flex;gap:6px">';
+    html += '<button class="btn-edit" onclick="addSubCat('+ci+')">+ زیردسته</button>';
+    html += '<button class="btn-del" onclick="delMainCat('+ci+')">🗑️</button></div></div>';
+    if(cat.subs && cat.subs.length){
+      cat.subs.forEach(function(sub, si){
+        html += '<div style="background:var(--bg3);border-radius:8px;padding:8px 10px;margin:4px 0 4px 8px;border-right:2px solid rgba(212,175,55,.3)">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+        html += '<span style="font-size:12px;color:var(--text)">▸ '+sub.name+'</span>';
+        html += '<div style="display:flex;gap:6px">';
+        html += '<button class="btn-edit" onclick="addSubSubCat('+ci+','+si+')">+ زیردسته</button>';
+        html += '<button class="btn-del" onclick="delSubCat('+ci+','+si+')">🗑️</button></div></div>';
+        if(sub.subs && sub.subs.length){
+          sub.subs.forEach(function(ss, ssi){
+            html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;margin:2px 0 2px 12px;background:rgba(0,0,0,.2);border-radius:6px">';
+            html += '<span style="font-size:11px;color:var(--text2)">◈ '+ss.name+'</span>';
+            html += '<button class="btn-del" style="padding:3px 8px;font-size:10px" onclick="delSubSubCat('+ci+','+si+','+ssi+')">🗑️</button></div>';
+          });
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+  });
+  el.innerHTML = html;
+  updateCatSelect(cats);
+}
+
+function updateCatSelect(cats){
+  var sel = document.getElementById('pCat');
+  var opts = '<option value="">بدون دسته</option>';
+  cats.forEach(function(cat){
+    opts += '<optgroup label="'+cat.name+'">';
+    if(cat.subs) cat.subs.forEach(function(sub){
+      if(sub.subs && sub.subs.length){
+        sub.subs.forEach(function(ss){
+          opts += '<option value="'+ss.id+'">'+cat.name+' › '+sub.name+' › '+ss.name+'</option>';
+        });
+      } else {
+        opts += '<option value="'+sub.id+'">'+sub.name+'</option>';
+      }
+    });
+    opts += '</optgroup>';
+  });
+  sel.innerHTML = opts;
+}
+
+function addMainCat(){
+  var n=prompt('نام دسته اصلی:'); if(!n) return;
+  var icon=prompt('آیکون (اختیاری مثل 📿):') || '📦';
+  var cats=getCats2();
+  var id='cat-'+Date.now();
+  cats.push({id:id,name:n,icon:icon,subs:[]});
+  setCats2(cats); renderCats();
+}
+function delMainCat(ci){ var c=getCats2(); c.splice(ci,1); setCats2(c); renderCats(); }
+
+function addSubCat(ci){
+  var n=prompt('نام زیردسته:'); if(!n) return;
+  var cats=getCats2();
+  var id='sub-'+Date.now();
+  cats[ci].subs = cats[ci].subs||[];
+  cats[ci].subs.push({id:id,name:n,subs:[]});
+  setCats2(cats); renderCats();
+}
+function delSubCat(ci,si){ var c=getCats2(); c[ci].subs.splice(si,1); setCats2(c); renderCats(); }
+
+function addSubSubCat(ci,si){
+  var n=prompt('نام زیرزیردسته:'); if(!n) return;
+  var cats=getCats2();
+  var id='ss-'+Date.now();
+  cats[ci].subs[si].subs = cats[ci].subs[si].subs||[];
+  cats[ci].subs[si].subs.push({id:id,name:n});
+  setCats2(cats); renderCats();
+}
+function delSubSubCat(ci,si,ssi){ var c=getCats2(); c[ci].subs[si].subs.splice(ssi,1); setCats2(c); renderCats(); }
+
+// نگه داشتن getCats قدیمی برای سازگاری
+function getCats(){ return []; }
+function setCats(c){}
+
+// ===== مداحی =====
+function getAudios(){ return JSON.parse(localStorage.getItem('audios')||'[]'); }
+function setAudios(a){ localStorage.setItem('audios', JSON.stringify(a)); }
+// ===== IndexedDB صوتی =====
+function openAudioDB(cb){
+  var req = indexedDB.open('AudioTestDB', 1);
+  req.onupgradeneeded = function(e){
+    var db = e.target.result;
+    if(!db.objectStoreNames.contains('audios'))
+      db.createObjectStore('audios', {keyPath:'id', autoIncrement:true});
+    if(!db.objectStoreNames.contains('videos'))
+      db.createObjectStore('videos', {keyPath:'id', autoIncrement:true});
+  };
+  req.onsuccess = function(e){ cb(e.target.result); };
+  req.onerror   = function(){ toast('❌ خطا در پایگاه داده','error'); };
+}
+
+function addAudio(){
+  var file = document.getElementById('newAudio').files[0];
+  if(!file) return;
+  var nameEl = document.querySelector('#sec-entertainment .audio-name');
+  if(nameEl) nameEl.textContent = '⏳ در حال آپلود '+file.name+'...';
+  toast('⏳ در حال بارگذاری...');
+  var reader = new FileReader();
+  reader.onload = function(e){
+    openAudioDB(function(db){
+      var tx = db.transaction('audios','readwrite');
+      tx.objectStore('audios').add({name:file.name, data:e.target.result, size:file.size});
+      tx.oncomplete = function(){
+        if(nameEl) nameEl.textContent = 'برای آپلود کلیک کنید';
+        document.getElementById('newAudio').value='';
+        renderAudios();
+        toast('✅ '+file.name+' افزوده شد');
+      };
+      tx.onerror = function(){ toast('❌ خطا در ذخیره','error'); };
+    });
+  };
+  reader.onerror = function(){ toast('❌ خطا در خواندن فایل','error'); };
+  reader.readAsDataURL(file);
+}
+
+function renderAudios(){
+  var el = document.getElementById('audioList');
+  if(!el){ setTimeout(renderAudios, 500); return; }
+  el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">در حال بارگذاری...</div>';
+  var req = indexedDB.open('AudioTestDB', 1);
+  req.onupgradeneeded = function(e){
+    var db = e.target.result;
+    if(!db.objectStoreNames.contains('audios'))
+      db.createObjectStore('audios',{keyPath:'id',autoIncrement:true});
+    if(!db.objectStoreNames.contains('videos'))
+      db.createObjectStore('videos',{keyPath:'id',autoIncrement:true});
+  };
+  req.onsuccess = function(e){
+    var db = e.target.result;
+    var tx = db.transaction('audios','readonly');
+    var getAll = tx.objectStore('audios').getAll();
+    getAll.onsuccess = function(ev){
+      var list = ev.target.result||[];
+      if(!list.length){
+        el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">فایلی آپلود نشده</div>';
+        return;
+      }
+      el.innerHTML = list.map(function(a){
+        var mb = a.size?(a.size/1024/1024).toFixed(1)+' MB':'';
+        return '<div class="prod-item" style="flex-direction:column;align-items:stretch;gap:8px">'
+          +'<div style="display:flex;justify-content:space-between;align-items:center">'
+          +'<div><span style="font-size:13px;font-weight:700">🎵 '+a.name+'</span>'
+          +(mb?' <span style="font-size:10px;color:var(--text2)">'+mb+'</span>':'')+'</div>'
+          +'<button class="btn-del" onclick="delAudio('+a.id+')">🗑️</button></div>'
+          +'<audio controls src="'+a.data+'" style="width:100%;border-radius:8px"></audio></div>';
+      }).join('');
+    };
+  };
+  req.onerror = function(){
+    el.innerHTML='<div style="color:var(--red);padding:10px;font-size:12px">❌ خطا در بارگذاری</div>';
+  };
+}
+
+function delAudio(id){
+  var req = indexedDB.open('AudioTestDB',1);
+  req.onsuccess = function(e){
+    var tx = e.target.result.transaction('audios','readwrite');
+    tx.objectStore('audios').delete(id);
+    tx.oncomplete = function(){ renderAudios(); toast('🗑️ حذف شد'); };
+  };
+}
+
+function delAudio(id){
+  openAudioDB(function(db){
+    var tx = db.transaction('audios','readwrite');
+    tx.objectStore('audios').delete(id);
+    tx.oncomplete = function(){ renderAudios(); toast('🗑️ حذف شد'); };
+  });
+}
+
+// ===== ویدیو =====
+function addVideo(){
+  var file = document.getElementById('newVideo').files[0];
+  if(!file) return;
+  if(file.size > 50*1024*1024){ toast('حجم فایل بیشتر از ۵۰ مگابایت است','error'); return; }
+  document.getElementById('videoName').textContent = '⏳ در حال آپلود '+file.name+'...';
+  toast('⏳ در حال بارگذاری ویدیو...');
+  var reader = new FileReader();
+  reader.onload = function(e){
+    openAudioDB(function(db){
+      var tx = db.transaction('videos','readwrite');
+      tx.objectStore('videos').add({name:file.name, data:e.target.result, size:file.size});
+      tx.oncomplete = function(){
+        document.getElementById('videoName').textContent = 'برای آپلود کلیک کنید';
+        document.getElementById('newVideo').value='';
+        renderVideos();
+        toast('✅ کلیپ "'+file.name+'" افزوده شد');
+      };
+      tx.onerror = function(){ toast('❌ خطا در ذخیره ویدیو','error'); };
+    });
+  };
+  reader.onerror = function(){ toast('❌ خطا در خواندن فایل','error'); };
+  reader.readAsDataURL(file);
+}
+
+function renderVideos(){
+  var el = document.getElementById('videoList');
+  if(!el) return;
+  openAudioDB(function(db){
+    try{
+      var req = db.transaction('videos','readonly').objectStore('videos').getAll();
+      req.onsuccess = function(e){
+        var list = e.target.result||[];
+        if(!list.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">کلیپی آپلود نشده</div>'; return; }
+        el.innerHTML = list.map(function(v){
+          var mb = v.size?(v.size/1024/1024).toFixed(1)+' MB':'';
+          return '<div class="prod-item" style="flex-direction:column;gap:8px">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center">'
+            +'<div><span style="font-size:13px;font-weight:700">🎬 '+v.name+'</span>'
+            +(mb?' <span style="font-size:10px;color:var(--text2)">'+mb+'</span>':'')+'</div>'
+            +'<button class="btn-del" onclick="delVideo('+v.id+')">🗑️</button></div>'
+            +'<video controls src="'+v.data+'" style="width:100%;border-radius:8px;max-height:200px" playsinline></video></div>';
+        }).join('');
+      };
+    }catch(e){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">کلیپی آپلود نشده</div>'; }
+  });
+}
+
+function delVideo(id){
+  openAudioDB(function(db){
+    var tx = db.transaction('videos','readwrite');
+    tx.objectStore('videos').delete(id);
+    tx.oncomplete = function(){ renderVideos(); toast('🗑️ حذف شد'); };
+  });
+}
+
+function getAudios(){ return []; }
+function setAudios(a){}
+function renderAudios(){
+  var audios = getAudios();
+  var el = document.getElementById('audioList');
+  if(!audios.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">فایلی آپلود نشده</div>'; return; }
+  el.innerHTML = audios.map(function(a,i){
+    return '<div class="prod-item" style="flex-direction:column;align-items:stretch">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      +'<span style="font-size:12px">🎵 '+a.name+'</span>'
+      +'<button class="btn-del" onclick="delAudio('+i+')">🗑️</button></div>'
+      +'<audio controls src="'+a.data+'" style="width:100%;border-radius:8px"></audio></div>';
+  }).join('');
+}
+function delAudio(i){ var a=getAudios(); a.splice(i,1); setAudios(a); renderAudios(); }
+
+// ===== حدیث =====
+function getHadiths(){ return JSON.parse(localStorage.getItem('hadiths')||'[]'); }
+function setHadiths(h){ localStorage.setItem('hadiths', JSON.stringify(h)); }
+function addHadith(){
+  var t=document.getElementById('newHadith').value;
+  var s=document.getElementById('newHadithSource').value;
+  if(!t) return;
+  var h=getHadiths(); h.push({text:t,source:s}); setHadiths(h);
+  document.getElementById('newHadith').value='';
+  document.getElementById('newHadithSource').value='';
+  renderHadiths();
+  toast('✅ حدیث افزوده شد');
+}
+function renderHadiths(){
+  var h=getHadiths();
+  var el=document.getElementById('hadithList');
+  if(!h.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">حدیثی ثبت نشده</div>'; return; }
+  el.innerHTML=h.map(function(item,i){
+    return '<div class="hadith-item">'
+      +'<div class="hadith-text">«'+item.text+'»'+(item.source?'<br><span style="color:var(--g)">— '+item.source+'</span>':'')+'</div>'
+      +'<button class="btn-del" onclick="delHadith('+i+')">🗑️</button></div>';
+  }).join('');
+}
+function delHadith(i){ var h=getHadiths(); h.splice(i,1); setHadiths(h); renderHadiths(); }
+
+// ===== گالری =====
+function getGallery(){ return JSON.parse(localStorage.getItem('gallery')||'[]'); }
+function setGallery(g){ localStorage.setItem('gallery', JSON.stringify(g)); }
+function addGallery(){
+  var files=document.getElementById('galleryFile').files;
+  var gallery=getGallery();
+  var count=0;
+  Array.from(files).forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      gallery.push(e.target.result);
+      count++;
+      if(count===files.length){ setGallery(gallery); renderGallery(); toast('✅ '+count+' عکس افزوده شد'); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function renderGallery(){
+  var g=getGallery();
+  var el=document.getElementById('galleryList');
+  el.innerHTML=g.map(function(src,i){
+    return '<div style="position:relative">'
+      +'<img src="'+src+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px">'
+      +'<button onclick="delGallery('+i+')" style="position:absolute;top:3px;right:3px;background:rgba(229,57,53,.9);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer">✕</button>'
+      +'</div>';
+  }).join('');
+}
+function delGallery(i){ var g=getGallery(); g.splice(i,1); setGallery(g); renderGallery(); }
+
+// ===== مزایا =====
+function getAdvantages(){ return JSON.parse(localStorage.getItem('advantages')||'[]'); }
+function setAdvantages(a){ localStorage.setItem('advantages', JSON.stringify(a)); }
+function addAdvantage(){
+  var n=prompt('مزیت را بنویسید:'); if(!n) return;
+  var a=getAdvantages(); a.push(n); setAdvantages(a); renderAdvantages();
+}
+function renderAdvantages(){
+  var a=getAdvantages();
+  var el=document.getElementById('advantageList');
+  if(!a.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">مزیتی ثبت نشده</div>'; return; }
+  el.innerHTML=a.map(function(item,i){
+    return '<div class="prod-item"><div class="prod-info"><div class="prod-name">✅ '+item+'</div></div>'
+      +'<button class="btn-del" onclick="delAdvantage('+i+')">🗑️</button></div>';
+  }).join('');
+}
+function delAdvantage(i){ var a=getAdvantages(); a.splice(i,1); setAdvantages(a); renderAdvantages(); }
+
+// ===== رمز =====
+function changePass(){
+  var op=document.getElementById('oldPass').value;
+  var np=document.getElementById('newPass').value;
+  var np2=document.getElementById('newPass2').value;
+  var saved=localStorage.getItem('adminPass')||DEFAULT_PASS;
+  if(op!==saved){ toast('رمز فعلی اشتباه است','error'); return; }
+  if(np!==np2){ toast('رمزهای جدید یکسان نیستند','error'); return; }
+  if(np.length<4){ toast('رمز باید حداقل ۴ کاراکتر باشد','error'); return; }
+  localStorage.setItem('adminPass',np);
+  ['oldPass','newPass','newPass2'].forEach(function(id){ document.getElementById(id).value=''; });
+  toast('✅ رمز تغییر کرد');
+}
+
+// ===== پشتیبان =====
+function exportData(){
+  var data={
+    appConfig:getConfig(),
+    products:getProds(),
+    cats:getCats(),
+    audios:getAudios(),
+    hadiths:getHadiths(),
+    gallery:getGallery(),
+    advantages:getAdvantages()
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='nooooor-backup-'+Date.now()+'.json';
+  a.click();
+  toast('✅ فایل پشتیبان دانلود شد');
+}
+function importData(){
+  var file=document.getElementById('importFile').files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      if(data.appConfig) setConfig(data.appConfig);
+      if(data.products)  setProds(data.products);
+      if(data.cats)      setCats(data.cats);
+      if(data.audios)    setAudios(data.audios);
+      if(data.hadiths)   setHadiths(data.hadiths);
+      if(data.gallery)   setGallery(data.gallery);
+      if(data.advantages) setAdvantages(data.advantages);
+      loadAll();
+      toast('✅ پشتیبان بارگذاری شد');
+    }catch(err){ toast('فایل نامعتبر است','error'); }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll(){
+  if(!confirm('همه تنظیمات پاک شود؟')) return;
+  ['appConfig','products','cats','audios','hadiths','gallery','advantages'].forEach(function(k){ localStorage.removeItem(k); });
+  toast('🔄 بازنشانی شد');
+  setTimeout(function(){ location.reload(); },1000);
+}
+
+// ===== بارگذاری =====
+function loadAll(){
+  var c=getConfig();
+  if(c.colorPrimary){ document.getElementById('colorPrimary').value=c.colorPrimary; document.getElementById('colorPrimaryTxt').value=c.colorPrimary; }
+  if(c.colorBg){ document.getElementById('colorBg').value=c.colorBg; document.getElementById('colorBgTxt').value=c.colorBg; }
+  if(c.colorBg2){ document.getElementById('colorBg2').value=c.colorBg2; document.getElementById('colorBg2Txt').value=c.colorBg2; }
+  if(c.colorText){ document.getElementById('colorText').value=c.colorText; document.getElementById('colorTextTxt').value=c.colorText; }
+  if(c.fontFamily) document.getElementById('fontFamily').value=c.fontFamily;
+  if(c.fontSize)   document.getElementById('fontSize').value=c.fontSize;
+  if(c.borderRadius) document.getElementById('borderRadius').value=c.borderRadius;
+  if(c.darkMode!==undefined) document.getElementById('darkMode').checked=c.darkMode;
+  if(c.animations!==undefined) document.getElementById('animations').checked=c.animations;
+  if(c.shopName)   document.getElementById('shopName').value=c.shopName;
+  if(c.shopSub)    document.getElementById('shopSub').value=c.shopSub;
+  if(c.shopSlogan) document.getElementById('shopSlogan').value=c.shopSlogan;
+  if(c.autoPlayAudio!==undefined) document.getElementById('autoPlayAudio').checked=c.autoPlayAudio;
+  if(c.bannerTitle) document.getElementById('bannerTitle').value=c.bannerTitle;
+  if(c.bannerDesc)  document.getElementById('bannerDesc').value=c.bannerDesc;
+  if(c.bannerBtn)   document.getElementById('bannerBtn').value=c.bannerBtn;
+  if(c.noticeTitle) document.getElementById('noticeTitle').value=c.noticeTitle;
+  if(c.noticeText)  document.getElementById('noticeText').value=c.noticeText;
+  if(c.showNotice!==undefined) document.getElementById('showNotice').checked=c.showNotice;
+  if(c.showTopProducts!==undefined) document.getElementById('showTopProducts').checked=c.showTopProducts;
+  if(c.topProductsCount) document.getElementById('topProductsCount').value=c.topProductsCount;
+  if(c.gameType)   document.getElementById('gameType').value=c.gameType;
+  if(c.clubName)   document.getElementById('clubName').value=c.clubName;
+  if(c.clubDesc)   document.getElementById('clubDesc').value=c.clubDesc;
+  if(c.pointRate)  document.getElementById('pointRate').value=c.pointRate;
+  if(c.minPoint)   document.getElementById('minPoint').value=c.minPoint;
+  if(c.clubActive!==undefined) document.getElementById('clubActive').checked=c.clubActive;
+  if(c.phone1)     document.getElementById('phone1').value=c.phone1;
+  if(c.phone2)     document.getElementById('phone2').value=c.phone2;
+  if(c.address)    document.getElementById('address').value=c.address;
+  if(c.workHours)  document.getElementById('workHours').value=c.workHours;
+  if(c.whatsapp)   document.getElementById('whatsapp').value=c.whatsapp;
+  if(c.instagram)  document.getElementById('instagram').value=c.instagram;
+  if(c.telegram)   document.getElementById('telegram').value=c.telegram;
+  if(c.rubika)     document.getElementById('rubika').value=c.rubika;
+  if(c.eitaaToken)  document.getElementById('eitaaToken').value=c.eitaaToken;
+  if(c.eitaaChatId) document.getElementById('eitaaChatId').value=c.eitaaChatId;
+  if(c.aboutText)  document.getElementById('aboutText').value=c.aboutText;
+  if(c.managerMsg) document.getElementById('managerMsg').value=c.managerMsg;
+  if(c.managerName) document.getElementById('managerName').value=c.managerName;
+  if(c.logoImg){ document.getElementById('logoPreview').src=c.logoImg; document.getElementById('logoPreview').style.display='block'; }
+  if(c.bannerImg){ document.getElementById('bannerPreview').src=c.bannerImg; document.getElementById('bannerPreview').style.display='block'; }
+
+  renderProds(); renderCats(); renderAudios(); renderVideos(); renderHadiths(); renderGallery(); renderAdvantages();
+  renderPartners(); renderEitaaLinks(); renderPartnerLogs(); renderPartnerOrdersAdmin(); renderStats();
+
+  // حجم storage
+  var total=0;
+  for(var k in localStorage){ if(localStorage.hasOwnProperty(k)) total+=localStorage[k].length; }
+  document.getElementById('storageInfo').textContent='حجم داده: '+(total/1024).toFixed(1)+' KB';
+}
+
+
+// ===== همکاران =====
+function getPartners(){ return JSON.parse(localStorage.getItem('partners')||'[]'); }
+function setPartners(p){ localStorage.setItem('partners', JSON.stringify(p)); }
+
+function genCode(){
+  return 'HMK-'+Math.floor(1000+Math.random()*9000);
+}
+
+function addPartner(){
+  var name  = document.getElementById('newPartnerName').value.trim();
+  var phone = document.getElementById('newPartnerPhone').value.trim();
+  var note  = document.getElementById('newPartnerNote').value.trim();
+  if(!name){ toast('نام همکار الزامی است','error'); return; }
+  var partners = getPartners();
+  var code = genCode();
+  // مطمئن شو کد تکراری نباشه
+  while(partners.find(function(p){ return p.code===code; })){ code=genCode(); }
+  var p = {name:name,phone:phone,note:note,code:code,active:true,
+    joinDate:todayAdmin(),orders:0};
+  partners.push(p);
+  setPartners(partners);
+  document.getElementById('newPartnerName').value='';
+  document.getElementById('newPartnerPhone').value='';
+  document.getElementById('newPartnerNote').value='';
+  renderPartners();
+  toast('✅ همکار افزوده شد — کد: '+code);
+
+  // اعلان ایتا
+  notifyAllEitaa('🤝 همکار جدید ثبت شد\n━━━━━━━━━━━━\n👤 نام: '+name+'\n📱 موبایل: '+phone+'\n🔑 کد اختصاصی: '+code+'\n📅 '+todayAdmin());
+}
+
+function renderPartners(){
+  var partners = getPartners();
+  document.getElementById('partnerCount').textContent = '('+partners.length+' نفر)';
+  var el = document.getElementById('partnerList');
+  if(!partners.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:12px">همکاری ثبت نشده</div>'; return; }
+  el.innerHTML = partners.map(function(p,i){
+    return '<div class="prod-item">'
+      +'<div class="prod-info">'
+      +'<div class="prod-name">'+p.name+(p.active?'':' <span style="color:var(--red);font-size:10px">(غیرفعال)</span>')+'</div>'
+      +'<div class="prod-price">🔑 '+p.code+' &nbsp;|&nbsp; 📱 '+(p.phone||'-')+'</div>'
+      +(p.note?'<div style="font-size:11px;color:var(--text2)">'+p.note+'</div>':'')
+      +'</div>'
+      +'<div class="prod-actions">'
+      +'<button class="btn-edit" onclick="togglePartner('+i+')">'+(p.active?'🔒 غیرفعال':'🔓 فعال')+'</button>'
+      +'<button class="btn-del" onclick="delPartner('+i+')">🗑️</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+function togglePartner(i){
+  var p = getPartners(); p[i].active = !p[i].active; setPartners(p); renderPartners();
+  toast(p[i].active?'✅ فعال شد':'🔒 غیرفعال شد');
+}
+function delPartner(i){
+  if(!confirm('حذف شود؟')) return;
+  var p=getPartners(); p.splice(i,1); setPartners(p); renderPartners();
+}
+
+// ===== لینک‌های ایتا =====
+function getEitaaLinks(){ return JSON.parse(localStorage.getItem('eitaaLinks')||'[]'); }
+function setEitaaLinks(l){ localStorage.setItem('eitaaLinks', JSON.stringify(l)); }
+
+function addEitaaLink(){
+  var token  = document.getElementById('newEitaaToken').value.trim();
+  var chatId = document.getElementById('newEitaaChatId').value.trim();
+  var name   = document.getElementById('newEitaaName').value.trim();
+  if(!token||!chatId){ toast('توکن و آیدی الزامی است','error'); return; }
+  var links = getEitaaLinks();
+  links.push({token:token,chatId:chatId,name:name||('کانال '+(links.length+1))});
+  setEitaaLinks(links);
+  document.getElementById('newEitaaToken').value='';
+  document.getElementById('newEitaaChatId').value='';
+  document.getElementById('newEitaaName').value='';
+  renderEitaaLinks();
+  toast('✅ لینک ایتا افزوده شد');
+}
+
+function renderEitaaLinks(){
+  var links = getEitaaLinks();
+  var el = document.getElementById('eitaaLinkList');
+  if(!links.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px;font-size:12px">لینکی اضافه نشده</div>'; return; }
+  el.innerHTML = links.map(function(l,i){
+    return '<div class="prod-item"><div class="prod-info">'
+      +'<div class="prod-name">'+l.name+'</div>'
+      +'<div class="prod-price">📨 '+l.chatId+'</div>'
+      +'</div><button class="btn-del" onclick="delEitaaLink('+i+')">🗑️</button></div>';
+  }).join('');
+}
+function delEitaaLink(i){ var l=getEitaaLinks(); l.splice(i,1); setEitaaLinks(l); renderEitaaLinks(); }
+
+function notifyAllEitaa(msg){
+  var links = getEitaaLinks();
+  links.forEach(function(l){
+    if(!l.token||!l.chatId) return;
+    fetch('https://eitaa.com/BotAPI'+l.token+'/sendMessage',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:l.chatId,text:msg})
+    }).catch(function(){});
+  });
+}
+
+// ===== لاگ ورود =====
+function renderPartnerLogs(){
+  var logs = JSON.parse(localStorage.getItem('partnerLogs')||'[]').slice(-10).reverse();
+  var el = document.getElementById('partnerLogs');
+  if(!logs.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:10px">ورودی ثبت نشده</div>'; return; }
+  el.innerHTML = logs.map(function(l){
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      +'<span>👤 '+l.name+' <span style="color:var(--text2);font-size:10px">('+l.code+')</span></span>'
+      +'<span style="color:var(--text2);font-size:11px">'+l.date+' '+l.time+'</span></div>';
+  }).join('');
+}
+
+// ===== سفارشات در ادمین =====
+function renderPartnerOrdersAdmin(){
+  var orders = JSON.parse(localStorage.getItem('partnerOrders')||'[]').slice().reverse();
+  var el = document.getElementById('partnerOrders');
+  if(!orders.length){ el.innerHTML='<div style="text-align:center;color:var(--text2);padding:20px;font-size:12px">سفارشی ثبت نشده</div>'; return; }
+  el.innerHTML = orders.map(function(o,i){
+    return '<div style="background:var(--bg4);border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid rgba(255,255,255,.06)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">'
+      +'<div style="font-size:13px;font-weight:600">'+o.prodName+'</div>'
+      +'<select onchange="updateOrderStatus('+i+',this.value)" style="background:var(--bg3);border:1px solid rgba(212,175,55,.2);color:var(--text);border-radius:6px;padding:4px 8px;font-size:11px">'
+      +'<option value="pending"'+(o.status==='pending'?' selected':'')+'>⏳ در انتظار</option>'
+      +'<option value="done"'+(o.status==='done'?' selected':'')+'>✅ تایید</option>'
+      +'</select></div>'
+      +'<div style="font-size:12px;color:var(--text2);line-height:1.9">'
+      +'👤 '+o.partnerName+' ('+o.partnerCode+') &nbsp;|&nbsp; 🔢 '+o.qty+' عدد<br>'
+      +'💰 '+o.total+' &nbsp;|&nbsp; 🆔 '+o.id+' &nbsp;|&nbsp; '+o.date
+      +(o.note?'<br>📝 '+o.note:'')+'</div></div>';
+  }).join('');
+}
+
+function updateOrderStatus(i,status){
+  var orders = JSON.parse(localStorage.getItem('partnerOrders')||'[]');
+  var reversed = orders.slice().reverse();
+  var realIdx = orders.length - 1 - i;
+  if(orders[realIdx]){ orders[realIdx].status=status; localStorage.setItem('partnerOrders',JSON.stringify(orders)); }
+}
+
+// ===== آمار =====
+function renderStats(){
+  // بازدید
+  var visits = parseInt(localStorage.getItem('appVisits')||'0');
+  document.getElementById('statVisits').textContent = visits;
+  // اعضا
+  var members = JSON.parse(localStorage.getItem('clubMembers')||'[]');
+  document.getElementById('statMembers').textContent = members.length;
+  // همکاران
+  var partners = getPartners().filter(function(p){ return p.active; });
+  document.getElementById('statPartners').textContent = partners.length;
+  // سفارشات
+  var orders = JSON.parse(localStorage.getItem('partnerOrders')||'[]');
+  document.getElementById('statOrders').textContent = orders.length;
+  // آمار امروز
+  var today = todayAdmin();
+  var todayOrders = orders.filter(function(o){ return o.date===today; });
+  var todayLogs = JSON.parse(localStorage.getItem('partnerLogs')||'[]').filter(function(l){ return l.date===today; });
+  document.getElementById('todayStats').innerHTML =
+    '📦 سفارش امروز: '+todayOrders.length+'<br>'
+    +'🤝 ورود همکار امروز: '+todayLogs.length+'<br>'
+    +'👥 عضو جدید باشگاه: '+members.filter(function(m){ return m.joinDate===today; }).length;
+  // وضعیت نمایش عمومی
+  var showPub = localStorage.getItem('showPublicStats')==='1';
+  document.getElementById('showPublicStats').checked = showPub;
+}
+
+function savePublicStats(){
+  var v = document.getElementById('showPublicStats').checked;
+  localStorage.setItem('showPublicStats', v?'1':'0');
+  toast('✅ ذخیره شد');
+}
+
+function todayAdmin(){ var d=new Date(); return d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate(); }
+
+// ===== Toast =====
+function toast(msg, type){
+  var el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='show'+(type==='error'?' error':'');
+  setTimeout(function(){ el.className=''; },2500);
+}
+
+
+// ===== بازه قیمتی همکار =====
+var currentTiers = [];
+
+function addTier(){
+  var from  = document.getElementById('tierFrom').value;
+  var to    = document.getElementById('tierTo').value;
+  var price = document.getElementById('tierPrice').value;
+  if(!from||!to||!price){ toast('همه فیلدها را پر کنید','error'); return; }
+  currentTiers.push({from:from, to:to, price:price});
+  renderTiers();
+  document.getElementById('tierFrom').value='';
+  document.getElementById('tierTo').value='';
+  document.getElementById('tierPrice').value='';
+}
+
+function renderTiers(){
+  var el = document.getElementById('tierList');
+  if(!currentTiers.length){
+    el.innerHTML='<div style="font-size:11px;color:var(--text2);text-align:center;padding:8px">بازه‌ای ثبت نشده</div>';
+    return;
+  }
+  el.innerHTML = currentTiers.map(function(t,i){
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      +'<span style="font-size:12px;color:var(--text2)">'+t.from+' تا '+t.to+' عدد</span>'
+      +'<span style="font-size:12px;color:var(--g);font-weight:700">'+t.price+' ت</span>'
+      +'<button class="btn-del" style="padding:3px 8px;font-size:10px" onclick="delTier('+i+')">✕</button></div>';
+  }).join('');
+}
+
+function delTier(i){
+  currentTiers.splice(i,1);
+  renderTiers();
+}
+
+
+// ===== ویرایش عکس با Canvas =====
+var aiUploadedImg = null;
+var aiResultDataUrl = null;
+
+function loadAIUpload(){
+  var file = document.getElementById('aiUploadFile').files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var prev = document.getElementById('aiUploadPreview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    aiUploadedImg = new Image();
+    aiUploadedImg.onload = function(){ toast('✅ عکس آماده ویرایش است'); };
+    aiUploadedImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function editWithAI(){
+  if(!aiUploadedImg){ toast('ابتدا عکس آپلود کنید','error'); return; }
+  toast('⏳ در حال ویرایش...');
+
+  var bgStyle = document.getElementById('aiBgStyle').value;
+  var text    = document.getElementById('aiTextOverlay').value;
+
+  var canvas = document.getElementById('aiCanvas');
+  var W = 800, H = 800;
+  canvas.width  = W;
+  canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  // رسم پس‌زمینه
+  var grad;
+  if(bgStyle==='gold'){
+    grad = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.7);
+    grad.addColorStop(0,'#fff8e1');
+    grad.addColorStop(0.4,'#ffd54f');
+    grad.addColorStop(0.7,'#d4af37');
+    grad.addColorStop(1,'#8B6914');
+    ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+    // نقوش اسلامی
+    ctx.strokeStyle='rgba(255,255,255,0.15)';
+    ctx.lineWidth=1;
+    for(var i=0;i<12;i++){
+      ctx.beginPath();
+      ctx.arc(W/2,H/2,(i+1)*38,0,Math.PI*2);
+      ctx.stroke();
+    }
+    // چهارگوش‌های تزئینی
+    ctx.strokeStyle='rgba(255,255,255,0.1)';
+    ctx.lineWidth=1.5;
+    for(var j=0;j<5;j++){
+      var m=j*30+40;
+      ctx.strokeRect(m,m,W-2*m,H-2*m);
+    }
+  } else if(bgStyle==='dark'){
+    grad = ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*0.8);
+    grad.addColorStop(0,'#2d2200');
+    grad.addColorStop(0.5,'#1a1400');
+    grad.addColorStop(1,'#000000');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    // نقاط طلایی
+    ctx.fillStyle='rgba(212,175,55,0.3)';
+    for(var k=0;k<80;k++){
+      var x=Math.random()*W, y=Math.random()*H, r=Math.random()*2+0.5;
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    }
+    // حلقه‌های درخشان
+    ctx.strokeStyle='rgba(212,175,55,0.2)'; ctx.lineWidth=1;
+    for(var l=0;l<6;l++){
+      ctx.beginPath(); ctx.arc(W/2,H/2,(l+1)*65,0,Math.PI*2); ctx.stroke();
+    }
+  } else if(bgStyle==='white'){
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#f5f5f5';
+    for(var m2=0;m2<W;m2+=20){
+      for(var n=0;n<H;n+=20){
+        if((m2+n)%40===0) ctx.fillRect(m2,n,10,10);
+      }
+    }
+  } else if(bgStyle==='nature'){
+    grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#1b5e20');
+    grad.addColorStop(0.5,'#2e7d32');
+    grad.addColorStop(1,'#388e3c');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    // دایره‌های نور
+    ctx.fillStyle='rgba(255,255,255,0.05)';
+    for(var p=0;p<20;p++){
+      ctx.beginPath();
+      ctx.arc(Math.random()*W,Math.random()*H,Math.random()*60+10,0,Math.PI*2);
+      ctx.fill();
+    }
+  } else if(bgStyle==='gradient'){
+    grad = ctx.createLinearGradient(0,0,W,H);
+    grad.addColorStop(0,'#6a1b9a');
+    grad.addColorStop(0.3,'#1565c0');
+    grad.addColorStop(0.6,'#00695c');
+    grad.addColorStop(1,'#e65100');
+    ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='rgba(255,255,255,0.05)';
+    for(var q=0;q<5;q++){
+      var gx=ctx.createRadialGradient(Math.random()*W,Math.random()*H,0,W/2,H/2,W);
+      gx.addColorStop(0,'rgba(255,255,255,0.15)');
+      gx.addColorStop(1,'transparent');
+      ctx.fillStyle=gx; ctx.fillRect(0,0,W,H);
+    }
+  } else if(bgStyle==='marble'){
+    ctx.fillStyle='#f5f5f5'; ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(0,0,0,0.04)'; ctx.lineWidth=2;
+    for(var r2=0;r2<30;r2++){
+      ctx.beginPath();
+      ctx.moveTo(Math.random()*W,0);
+      ctx.bezierCurveTo(Math.random()*W,H/3,Math.random()*W,H*2/3,Math.random()*W,H);
+      ctx.stroke();
+    }
+  }
+
+  // سایه محصول
+  var imgSize = Math.min(W,H) * 0.65;
+  var imgX = (W-imgSize)/2, imgY = (H-imgSize)/2 - (text?30:10);
+  ctx.shadowColor='rgba(0,0,0,0.4)';
+  ctx.shadowBlur=40; ctx.shadowOffsetY=15;
+
+  // رسم عکس محصول با حاشیه گرد
+  ctx.save();
+  ctx.beginPath();
+  var rad=20;
+  ctx.moveTo(imgX+rad,imgY);
+  ctx.lineTo(imgX+imgSize-rad,imgY);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY,imgX+imgSize,imgY+rad);
+  ctx.lineTo(imgX+imgSize,imgY+imgSize-rad);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY+imgSize,imgX+imgSize-rad,imgY+imgSize);
+  ctx.lineTo(imgX+rad,imgY+imgSize);
+  ctx.quadraticCurveTo(imgX,imgY+imgSize,imgX,imgY+imgSize-rad);
+  ctx.lineTo(imgX,imgY+rad);
+  ctx.quadraticCurveTo(imgX,imgY,imgX+rad,imgY);
+  ctx.closePath();
+  ctx.clip();
+  ctx.drawImage(aiUploadedImg, imgX, imgY, imgSize, imgSize);
+  ctx.restore();
+
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // حاشیه طلایی دور عکس
+  ctx.strokeStyle = bgStyle==='white'?'#d4af37':'rgba(255,255,255,0.5)';
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.moveTo(imgX+rad,imgY);
+  ctx.lineTo(imgX+imgSize-rad,imgY);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY,imgX+imgSize,imgY+rad);
+  ctx.lineTo(imgX+imgSize,imgY+imgSize-rad);
+  ctx.quadraticCurveTo(imgX+imgSize,imgY+imgSize,imgX+imgSize-rad,imgY+imgSize);
+  ctx.lineTo(imgX+rad,imgY+imgSize);
+  ctx.quadraticCurveTo(imgX,imgY+imgSize,imgX,imgY+imgSize-rad);
+  ctx.lineTo(imgX,imgY+rad);
+  ctx.quadraticCurveTo(imgX,imgY,imgX+rad,imgY);
+  ctx.closePath();
+  ctx.stroke();
+
+  // متن روی عکس
+  if(text){
+    var textY = imgY+imgSize+45;
+    ctx.fillStyle = bgStyle==='white'?'#d4af37':'rgba(255,255,255,0.95)';
+    ctx.font = 'bold 32px Tahoma';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // سایه متن
+    ctx.shadowColor='rgba(0,0,0,0.5)'; ctx.shadowBlur=8;
+    ctx.fillText(text, W/2, textY);
+    ctx.shadowColor='transparent'; ctx.shadowBlur=0;
+  }
+
+  // واترمارک
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.font='14px Tahoma';
+  ctx.textAlign='center';
+  ctx.fillText('ریحانة نورالزهرا', W/2, H-20);
+
+  aiResultDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  document.getElementById('aiResultCard').style.display='block';
+  canvas.scrollIntoView({behavior:'smooth'});
+  toast('✅ ویرایش انجام شد!');
+}
+
+
+function useAIImgForProd(){
+  if(!aiResultDataUrl){ toast('ابتدا در تب هوش مصنوعی عکس بسازید','error'); return; }
+  tempImgs.pImgData = aiResultDataUrl;
+  document.getElementById('pImgPreview').src = aiResultDataUrl;
+  document.getElementById('pImgPreview').style.display = 'block';
+  toast('✅ عکس هوش مصنوعی اضافه شد');
+}
+
+function useAIAsLogo(){
+  if(!aiResultDataUrl) return;
+  var c=getConfig(); c.logoImg=aiResultDataUrl; setConfig(c);
+  document.getElementById('logoPreview').src=aiResultDataUrl;
+  document.getElementById('logoPreview').style.display='block';
+  toast('✅ به عنوان لوگو ذخیره شد');
+}
+function useAIAsBanner(){
+  if(!aiResultDataUrl) return;
+  var c=getConfig(); c.bannerImg=aiResultDataUrl; setConfig(c);
+  document.getElementById('bannerPreview').src=aiResultDataUrl;
+  document.getElementById('bannerPreview').style.display='block';
+  toast('✅ به عنوان بنر ذخیره شد');
+}
+function downloadAIImg(){
+  if(!aiResultDataUrl) return;
+  var a=document.createElement('a');
+  a.href=aiResultDataUrl;
+  a.download='edited-'+Date.now()+'.jpg';
+  a.click();
+}
+
+// ===== هوش مصنوعی =====
+var aiCurrentImg = null;
+
+var faToEn = {
+  'تسبیح':'tasbih prayer beads','مهر نماز':'prayer stone turbah','چادر':'islamic hijab chador',
+  'روسری':'islamic headscarf','عطر':'arabic perfume oud','قرآن':'quran holy book',
+  'مذهبی':'islamic religious','حرم':'holy shrine','کربلا':'karbala','مکه':'mecca',
+  'طلایی':'golden','کریستال':'crystal','چوبی':'wooden','فیروزه':'turquoise',
+  'نماز':'prayer','زیارت':'pilgrimage','هدیه':'gift','جعبه':'box',
+};
+
+function translatePrompt(fa){
+  var en = fa;
+  Object.keys(faToEn).forEach(function(k){ en = en.replace(new RegExp(k,'g'), faToEn[k]); });
+  return en;
+}
+
+function buildUrl(prompt, style, size){
+  var parts = size.split('x');
+  var w = parts[0], h = parts[1];
+  var full = encodeURIComponent(prompt + ', ' + style);
+  return 'https://image.pollinations.ai/prompt/' + full + '?width='+w+'&height='+h+'&nologo=true&seed='+Math.floor(Math.random()*9999);
+}
+
+function generateAI(){
+  var fa    = document.getElementById('aiPromptFa').value.trim();
+  var style = document.getElementById('aiStyle').value;
+  var size  = document.getElementById('aiSize').value;
+  if(!fa){ toast('توضیح محصول را بنویسید','error'); return; }
+
+  var prompt = translatePrompt(fa);
+  var url    = buildUrl(prompt, style, size);
+
+  document.getElementById('aiResultCard').style.display = 'block';
+  document.getElementById('aiLoading').style.display    = 'block';
+  document.getElementById('aiResultImg').style.display  = 'none';
+  aiCurrentImg = null;
+
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    document.getElementById('aiLoading').style.display   = 'none';
+    document.getElementById('aiResultImg').style.display = 'block';
+    document.getElementById('aiResultImg').src = url;
+    aiCurrentImg = url;
+    toast('✅ تصویر آماده شد!');
+  };
+  img.onerror = function(){
+    document.getElementById('aiLoading').innerHTML = '<div style="color:#ef5350;padding:20px">❌ خطا در تولید تصویر<br><small>اینترنت رو چک کنید</small></div>';
+  };
+  img.src = url;
+}
+
+function generateProdImg(){
+  var name = document.getElementById('aiProdName').value.trim();
+  if(!name){ toast('نام محصول را بنویسید','error'); return; }
+  var prompt = translatePrompt(name);
+  var url = buildUrl(prompt, 'product photo, white background, professional photography, high quality', '512x512');
+  var res = document.getElementById('aiProdResult');
+  var img = document.getElementById('aiProdImg');
+  res.style.display = 'none';
+  img.onload = function(){ res.style.display='block'; toast('✅ عکس محصول آماده شد!'); };
+  img.onerror = function(){ toast('خطا در تولید','error'); };
+  img.src = url;
+  aiCurrentImg = url;
+}
+
+function generateBanner(){
+  var title = document.getElementById('aiBannerTitle').value.trim();
+  var desc  = document.getElementById('aiBannerDesc').value.trim();
+  if(!title){ toast('عنوان بنر را بنویسید','error'); return; }
+  var prompt = translatePrompt(title + ' ' + desc);
+  var url = buildUrl(prompt, 'store promotional banner, islamic style, golden decorative, beautiful background', '768x512');
+  var res = document.getElementById('aiBannerResult');
+  var img = document.getElementById('aiBannerImg');
+  res.style.display = 'none';
+  img.onload = function(){ res.style.display='block'; toast('✅ بنر آماده شد!'); };
+  img.onerror = function(){ toast('خطا در تولید','error'); };
+  img.src = url;
+}
+
+function imgToBase64(url, cb){
+  var canvas = document.createElement('canvas');
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    canvas.width = img.width; canvas.height = img.height;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    try{ cb(canvas.toDataURL('image/jpeg',0.85)); }
+    catch(e){ cb(url); }
+  };
+  img.onerror = function(){ cb(url); };
+  img.src = url + '&t=' + Date.now();
+}
+
+function useAsLogo(){
+  if(!aiCurrentImg){ toast('ابتدا تصویر تولید کنید','error'); return; }
+  imgToBase64(aiCurrentImg, function(b64){
+    var c = getConfig(); c.logoImg = b64; setConfig(c);
+    document.getElementById('logoPreview').src = b64;
+    document.getElementById('logoPreview').style.display = 'block';
+    toast('✅ به عنوان لوگو ذخیره شد');
+  });
+}
+
+function useAsBanner(){
+  if(!aiCurrentImg){ toast('ابتدا تصویر تولید کنید','error'); return; }
+  imgToBase64(aiCurrentImg, function(b64){
+    var c = getConfig(); c.bannerImg = b64; setConfig(c);
+    document.getElementById('bannerPreview').src = b64;
+    document.getElementById('bannerPreview').style.display = 'block';
+    toast('✅ به عنوان بنر ذخیره شد');
+  });
+}
+
+function useBannerImg(){
+  var src = document.getElementById('aiBannerImg').src;
+  if(!src){ return; }
+  imgToBase64(src, function(b64){
+    var c = getConfig(); c.bannerImg = b64; setConfig(c);
+    document.getElementById('bannerPreview').src = b64;
+    document.getElementById('bannerPreview').style.display = 'block';
+    toast('✅ بنر ذخیره شد');
+  });
+}
+
+function saveProdImgToNew(){
+  var src = document.getElementById('aiProdImg').src;
+  var name = document.getElementById('aiProdName').value;
+  imgToBase64(src, function(b64){
+    tempImgs.pImgData = b64;
+    document.getElementById('pName').value = name;
+    openProdModal(-1);
+    document.getElementById('pImgPreview').src = b64;
+    document.getElementById('pImgPreview').style.display = 'block';
+    showTab('products');
+    toast('✅ عکس اضافه شد — محصول را کامل کنید');
+  });
+}
+
+function downloadAI(){
+  if(!aiCurrentImg){ return; }
+  var a = document.createElement('a');
+  a.href = aiCurrentImg;
+  a.download = 'ai-image-'+Date.now()+'.jpg';
+  a.target = '_blank';
+  a.click();
+}
+
+
+</script>
+</body>
+</html>

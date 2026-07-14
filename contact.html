@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>تماس با ما</title>
+<style>
+:root{--g:#d4af37;--bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;--text:#f0f0f0;--text2:#888;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,sans-serif;padding-bottom:80px}
+header{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid rgba(212,175,55,.2);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.h-back{color:var(--g);font-size:20px;text-decoration:none}
+.h-title{color:var(--g);font-size:16px;font-weight:700}
+.content{padding:14px}
+.card{background:var(--bg3);border-radius:var(--radius);border:1px solid rgba(212,175,55,.1);padding:16px;margin-bottom:12px}
+.card-title{color:var(--g);font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.contact-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.contact-item:last-child{border-bottom:none}
+.c-left{display:flex;align-items:center;gap:10px}
+.c-icon{width:38px;height:38px;background:rgba(212,175,55,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.c-info .c-label{font-size:11px;color:var(--text2);margin-bottom:2px}
+.c-info .c-val{font-size:13px;color:var(--text);font-weight:600}
+.c-btn{background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.25);color:var(--g);padding:7px 14px;border-radius:20px;font-size:11px;cursor:pointer;text-decoration:none;white-space:nowrap}
+.social-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.social-btn{background:var(--bg4);border-radius:12px;border:1px solid rgba(255,255,255,.07);padding:14px;text-align:center;cursor:pointer;text-decoration:none;color:var(--text);transition:.2s;display:block}
+.social-btn:active{transform:scale(.96)}
+.social-icon{font-size:28px;margin-bottom:6px}
+.social-name{font-size:12px;color:var(--text2)}
+.map-placeholder{background:var(--bg4);border-radius:10px;height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text2);gap:8px;cursor:pointer;border:1px dashed rgba(212,175,55,.2)}
+.map-placeholder:active{background:rgba(212,175,55,.05)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid rgba(212,175,55,.2);display:flex;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;cursor:pointer;text-decoration:none;color:var(--text2);border:none;background:none;font-family:Tahoma}
+.nav-item.active{color:var(--g)}
+.nav-icon{font-size:22px}.nav-label{font-size:10px}
+</style>
+</head>
+<body>
+<header>
+  <a href="home.html" class="h-back">❮</a>
+  <div class="h-title">📞 تماس با ما</div>
+</header>
+<div class="content">
+  <div class="card">
+    <div class="card-title">📞 اطلاعات تماس</div>
+    <div class="contact-item">
+      <div class="c-left"><div class="c-icon">📱</div><div class="c-info"><div class="c-label">تلفن اول</div><div class="c-val" id="phone1">-</div></div></div>
+      <a class="c-btn" id="phone1Link" href="#">تماس</a>
+    </div>
+    <div class="contact-item" id="phone2Row" style="display:none">
+      <div class="c-left"><div class="c-icon">📱</div><div class="c-info"><div class="c-label">تلفن دوم</div><div class="c-val" id="phone2">-</div></div></div>
+      <a class="c-btn" id="phone2Link" href="#">تماس</a>
+    </div>
+    <div class="contact-item">
+      <div class="c-left"><div class="c-icon">🕐</div><div class="c-info"><div class="c-label">ساعات کاری</div><div class="c-val" id="workHours">-</div></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📍 آدرس</div>
+    <div style="font-size:13px;color:var(--text2);line-height:2;margin-bottom:12px" id="address">-</div>
+    <div class="map-placeholder" onclick="openMap()"><div style="font-size:32px">🗺️</div><div style="font-size:12px">نمایش روی نقشه</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🌐 شبکه‌های اجتماعی</div>
+    <div class="social-grid" id="socialGrid"></div>
+  </div>
+</div>
+<nav class="bottom-nav">
+  <a href="home.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">خانه</span></a>
+  <a href="products.html" class="nav-item"><span class="nav-icon">🛍️</span><span class="nav-label">محصولات</span></a>
+  <a href="club.html" class="nav-item"><span class="nav-icon">⭐</span><span class="nav-label">باشگاه</span></a>
+  <a href="entertainment.html" class="nav-item"><span class="nav-icon">🎵</span><span class="nav-label">سرگرمی</span></a>
+</nav>
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+var c=JSON.parse(localStorage.getItem('appConfig')||'{}');
+function applyConfig(){
+  try{
+    var r=document.documentElement.style;
+    if(c.colorPrimary) r.setProperty('--g',c.colorPrimary);
+    if(c.colorBg)      r.setProperty('--bg',c.colorBg);
+    if(c.colorBg2)     r.setProperty('--bg2',c.colorBg2);
+    if(c.colorText)    r.setProperty('--text',c.colorText);
+    if(c.phone1){ document.getElementById('phone1').textContent=c.phone1; document.getElementById('phone1Link').href='tel:'+c.phone1; }
+    if(c.phone2){ document.getElementById('phone2Row').style.display='flex'; document.getElementById('phone2').textContent=c.phone2; document.getElementById('phone2Link').href='tel:'+c.phone2; }
+    if(c.workHours) document.getElementById('workHours').textContent=c.workHours;
+    if(c.address)   document.getElementById('address').textContent=c.address;
+    var socials=[];
+    if(c.whatsapp)  socials.push({icon:'💬',name:'واتساپ',href:'https://wa.me/'+c.whatsapp.replace(/\D/g,'')});
+    if(c.instagram) socials.push({icon:'📸',name:'اینستاگرام',href:'https://instagram.com/'+c.instagram});
+    if(c.telegram)  socials.push({icon:'✈️',name:'تلگرام',href:'https://t.me/'+c.telegram});
+    if(c.rubika)    socials.push({icon:'💎',name:'روبیکا',href:'https://rubika.ir/'+c.rubika});
+    var sg=document.getElementById('socialGrid');
+    sg.innerHTML = socials.length ? socials.map(function(s){
+      return '<a href="'+s.href+'" target="_blank" class="social-btn"><div class="social-icon">'+s.icon+'</div><div class="social-name">'+s.name+'</div></a>';
+    }).join('') : '<div style="grid-column:1/-1;text-align:center;color:var(--text2);padding:20px;font-size:12px">توسط ادمین تنظیم می‌شود</div>';
+  }catch(e){}
+}
+function openMap(){
+  var addr=c.address||'';
+  if(addr) window.open('https://maps.google.com?q='+encodeURIComponent(addr),'_blank');
+}
+applyConfig();
+</script>
+</body>
+</html>
